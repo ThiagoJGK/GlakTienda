@@ -1,0 +1,63 @@
+.section {
+  overflow: hidden;
+}
+
+.scrollWrapper {
+  width: 100%;
+  overflow: visible;
+}
+
+.scrollTrack {
+  display: flex;
+  gap: var(--space-3);
+  padding-inline: var(--container-padding);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: var(--space-2); /* breathing room for shadow */
+}
+
+.scrollTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.cardSlot {
+  flex: 0 0 auto;
+  width: 160px;
+  scroll-snap-align: start;
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+  .cardSlot {
+    width: 180px;
+  }
+
+  .scrollTrack {
+    gap: var(--space-4);
+  }
+}
+
+/* Desktop: show as grid instead of scroll */
+@media (min-width: 1024px) {
+  .scrollTrack {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+    overflow-x: visible;
+    scroll-snap-type: none;
+    max-width: var(--container-max);
+    margin-inline: auto;
+  }
+
+  .cardSlot {
+    width: auto;
+  }
+}
+
+@media (min-width: 1280px) {
+  .scrollTrack {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}

@@ -1,0 +1,141 @@
+.section {
+  background-color: var(--bg-primary);
+}
+
+.heading {
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-6);
+}
+
+/* Mobile: 2-column grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.card {
+  position: relative;
+  display: block;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  color: white;
+  aspect-ratio: 1 / 1;
+}
+
+/* Mobile: first card spans both cols and is taller */
+.tall {
+  grid-column: span 2;
+  aspect-ratio: 2 / 1;
+}
+
+.wide {
+  grid-column: span 2;
+  aspect-ratio: 2.5 / 1;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.card:hover .image {
+  transform: scale(1.08);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    transparent 100%
+  );
+  transition: background var(--transition-base);
+}
+
+.card:hover .overlay {
+  background: linear-gradient(
+    to top,
+    rgba(86, 130, 3, 0.55) 0%,
+    rgba(0, 0, 0, 0.05) 50%,
+    transparent 100%
+  );
+}
+
+.label {
+  position: absolute;
+  bottom: var(--space-3);
+  left: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.name {
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.label svg {
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: all var(--transition-base);
+}
+
+.card:hover .label svg {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Tablet: 4-column bento */
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto auto;
+    gap: var(--space-4);
+  }
+
+  .card {
+    aspect-ratio: auto;
+  }
+
+  .tall {
+    grid-column: span 1;
+    grid-row: span 2;
+    aspect-ratio: auto;
+  }
+
+  .normal {
+    aspect-ratio: 1 / 1;
+  }
+
+  .wide {
+    grid-column: span 2;
+    aspect-ratio: auto;
+  }
+
+  .name {
+    font-size: var(--text-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .heading {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-8);
+  }
+
+  .label {
+    bottom: var(--space-4);
+    left: var(--space-4);
+    right: var(--space-4);
+  }
+}
