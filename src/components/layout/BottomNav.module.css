@@ -1,0 +1,42 @@
+.bottomNav {
+  position: fixed;
+  bottom: var(--space-3);
+  left: var(--space-3);
+  right: var(--space-3);
+  z-index: var(--z-navbar);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: var(--space-2) var(--space-1);
+  border-radius: var(--radius-xl);
+}
+
+/* Hide on desktop */
+@media (min-width: 768px) {
+  .bottomNav {
+    display: none;
+  }
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 56px;
+  min-height: 44px;
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  color: var(--text-tertiary);
+  text-decoration: none;
+  font-size: 0.625rem;
+  font-weight: 500;
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  transition: color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.item:hover,
+.item:active {
+  color: var(--accent-primary);
+}

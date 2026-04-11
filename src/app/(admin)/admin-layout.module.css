@@ -1,0 +1,63 @@
+.adminLayout {
+  display: flex;
+  min-height: 100dvh;
+}
+
+.mainArea {
+  flex: 1;
+  margin-left: 240px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+}
+
+@media (max-width: 767px) {
+  .mainArea {
+    margin-left: 0;
+  }
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  max-width: 1200px;
+}
+
+.pageTitle {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.userName {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.content {
+  flex: 1;
+  padding: var(--space-6);
+  max-width: 1200px;
+}
+
+@media (max-width: 767px) {
+  .content {
+    padding: var(--space-4);
+  }
+}
