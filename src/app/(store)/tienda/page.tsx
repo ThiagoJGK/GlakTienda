@@ -1,132 +1,110 @@
 import styles from './page.module.css';
 import ProductCard from '@/components/ui/ProductCard';
+import { createClient } from '@/lib/supabase/server';
+import TiendaFilters from './TiendaFilters';
 
-const categories = ['Todo', 'Vestidos', 'Camisas', 'Pantalones', 'Blusas', 'Accesorios', 'Abrigos'];
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dpm4judv4";
 
-/* Mock products — will come from Supabase + ISR */
-const products = [
-  {
-    name: 'Vestido Lino Natural',
-    price: 18900,
-    image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=530&fit=crop&q=75',
-    href: '/producto/vestido-lino-natural',
-    badge: 'NUEVO',
-    category: 'VESTIDOS',
-  },
-  {
-    name: 'Camisa Orgánica Blanca',
-    price: 14500,
-    image: 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=400&h=530&fit=crop&q=75',
-    href: '/producto/camisa-organica-blanca',
-    category: 'CAMISAS',
-  },
-  {
-    name: 'Pantalón Wide Leg Oliva',
-    price: 21300,
-    image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&h=530&fit=crop&q=75',
-    href: '/producto/pantalon-wide-leg-oliva',
-    category: 'PANTALONES',
-  },
-  {
-    name: 'Blazer Estructurado Beige',
-    price: 28700,
-    image: 'https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=400&h=530&fit=crop&q=75',
-    href: '/producto/blazer-estructurado-beige',
-    badge: 'BESTSELLER',
-    category: 'ABRIGOS',
-  },
-  {
-    name: 'Vestido Midi Terracotta',
-    price: 22100,
-    image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=530&fit=crop&q=75',
-    href: '/producto/vestido-midi-terracotta',
-    category: 'VESTIDOS',
-  },
-  {
-    name: 'Blusa Satinada Champagne',
-    price: 16800,
-    image: 'https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=400&h=530&fit=crop&q=75',
-    href: '/producto/blusa-satinada-champagne',
-    badge: 'NUEVO',
-    category: 'BLUSAS',
-  },
-  {
-    name: 'Falda Plisada Sage',
-    price: 15200,
-    image: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=400&h=530&fit=crop&q=75',
-    href: '/producto/falda-plisada-sage',
-    category: 'FALDAS',
-  },
-  {
-    name: 'Top Cruzado Arena',
-    price: 11900,
-    image: 'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=400&h=530&fit=crop&q=75',
-    href: '/producto/top-cruzado-arena',
-    category: 'BLUSAS',
-  },
-];
+function getProductImage(product: { images?: string[]; name: string }) {
+  if (product.images && product.images.length > 0) {
+    const img = product.images[0];
+    if (img.startsWith('http')) return img;
+    return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_400,h_530,q_75/${img}`;
+  }
+  return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=530&fit=crop&q=75';
+}
 
-export default function TiendaPage() {
+export const metadata = {
+  title: 'Tienda',
+  description: 'Explorá toda la colección de moda femenina Glak. Vestidos, camisas, pantalones y más.',
+};
+
+interface TiendaPageProps {
+  searchParams: Promise<{ cat?: string; q?: string; sort?: string }>;
+}
+
+export default async function TiendaPage({ searchParams }: TiendaPageProps) {
+  const params = await searchParams;
+  const activeCategory = params.cat || 'Todo';
+  const searchQuery = params.q || '';
+  const sortBy = params.sort || 'relevantes';
+
+  const supabase = await createClient();
+
+  let query = supabase
+    .from('products')
+    .select('*')
+    .eq('status', 'active');
+
+  // Filter by category
+  if (activeCategory && activeCategory !== 'Todo') {
+    query = query.ilike('category', activeCategory);
+  }
+
+  // Search by name
+  if (searchQuery) {
+    query = query.ilike('name', `%${searchQuery}%`);
+  }
+
+  // Sort
+  if (sortBy === 'menor-precio') {
+    query = query.order('price', { ascending: true });
+  } else if (sortBy === 'mayor-precio') {
+    query = query.order('price', { ascending: false });
+  } else {
+    query = query.order('created_at', { ascending: false });
+  }
+
+  const { data: products, error } = await query;
+
+  if (error) {
+    console.error("Error fetching products:", error);
+  }
+
+  const productList = products || [];
+
   return (
     <div className={styles.page}>
       <div className="container">
         {/* Header */}
         <div className={styles.header}>
-          <h1 className={styles.title}>Tienda</h1>
-          <p className={styles.subtitle}>Descubrí toda la colección Glak</p>
+          <h1 className={styles.title}>
+            {searchQuery ? `Resultados: "${searchQuery}"` : 'Tienda'}
+          </h1>
+          <p className={styles.subtitle}>
+            {searchQuery
+              ? `${productList.length} producto${productList.length !== 1 ? 's' : ''} encontrado${productList.length !== 1 ? 's' : ''}`
+              : 'Descubrí toda la colección Glak'}
+          </p>
         </div>
 
-        {/* Category filters */}
-        <div className={styles.filtersRow}>
-          <div className={styles.chips}>
-            {categories.map((cat, i) => (
-              <button
-                key={cat}
-                className={`${styles.chip} ${i === 0 ? styles.chipActive : ''}`}
-                id={`filter-${cat.toLowerCase()}`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Sort & count bar */}
-        <div className={styles.sortBar}>
-          <span className={styles.count}>{products.length} productos</span>
-          <div className={styles.sortActions}>
-            <button className={styles.sortBtn} id="filter-toggle">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
-                <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
-                <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
-                <line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" />
-                <line x1="17" y1="16" x2="23" y2="16" />
-              </svg>
-              Filtrar
-            </button>
-            <select className={styles.sortSelect} id="sort-select" aria-label="Ordenar productos">
-              <option>Relevantes</option>
-              <option>Menor precio</option>
-              <option>Mayor precio</option>
-              <option>Más nuevos</option>
-            </select>
-          </div>
-        </div>
+        {/* Interactive Client Filters */}
+        <TiendaFilters
+          activeCategory={activeCategory}
+          currentSort={sortBy}
+          productCount={productList.length}
+        />
 
         {/* Product grid */}
-        <div className={styles.productGrid}>
-          {products.map((product) => (
-            <ProductCard key={product.name} {...product} />
-          ))}
-        </div>
-
-        {/* Load more */}
-        <div className={styles.loadMore}>
-          <button className="btn btn-secondary" id="load-more-btn">
-            Cargar más
-          </button>
-        </div>
+        {productList.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>{searchQuery ? 'No encontramos productos con esa búsqueda.' : 'No hay productos disponibles todavía.'}</p>
+            <span>{searchQuery ? 'Probá con otro término o explorá las categorías.' : 'Los productos publicados desde el panel de admin aparecerán aquí.'}</span>
+          </div>
+        ) : (
+          <div className={styles.productGrid}>
+            {productList.map((product) => (
+              <ProductCard
+                key={product.id}
+                name={product.name}
+                price={product.price}
+                image={getProductImage(product)}
+                href={`/producto/${product.slug}`}
+                category={product.category?.toUpperCase()}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

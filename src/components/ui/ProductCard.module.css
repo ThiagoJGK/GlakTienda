@@ -1,8 +1,36 @@
+.cardContainer {
+  position: relative;
+  display: block;
+}
+
+.favoriteBtn {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-surface);
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-bounce);
+}
+
+.favoriteBtn:hover, .favoriteBtn:active {
+  color: var(--text-primary);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
 .card {
   display: block;
   text-decoration: none;
   color: inherit;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg); /* Increased radius */
   overflow: hidden;
   transition: transform var(--transition-base), box-shadow var(--transition-base);
   background: var(--bg-surface);
@@ -18,7 +46,7 @@
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg); /* Smooth image corners */
   background: var(--bg-subtle);
 }
 
@@ -49,7 +77,7 @@
 }
 
 .info {
-  padding: var(--space-3) var(--space-1) var(--space-1);
+  padding: var(--space-3) var(--space-2) var(--space-1);
 }
 
 .category {

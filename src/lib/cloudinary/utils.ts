@@ -3,7 +3,7 @@
  * Generates optimized URLs with automatic format (AVIF/WebP) and quality.
  */
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "glak";
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dpm4judv4";
 
 interface ImageOptions {
   width?: number;

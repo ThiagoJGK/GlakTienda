@@ -1,0 +1,234 @@
+.container {
+  padding: var(--space-6) 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-8);
+}
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.btnCreate {
+  border-radius: var(--radius-pill);
+  padding: var(--space-2) var(--space-5);
+  font-weight: 600;
+}
+
+.tableCard {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: var(--space-4) var(--space-5);
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--bg-primary);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: var(--bg-primary);
+}
+
+.alignRight {
+  text-align: right !important;
+}
+
+/* Cell Styles */
+.productCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.productInitial {
+  border-radius: var(--radius-md);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-subtle);
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.productName {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.productCategory {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.active {
+  background-color: rgba(86, 130, 3, 0.1);
+  color: var(--accent-primary);
+}
+
+.draft {
+  background-color: var(--bg-subtle);
+  color: var(--text-secondary);
+}
+
+.stock {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+.stockLow {
+  color: var(--error);
+  font-weight: 600;
+}
+
+.price {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.btnAction {
+  padding: var(--space-2);
+  color: var(--text-tertiary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btnAction:hover {
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+}
+
+.emptyState {
+  padding: 40px;
+  text-align: center;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-xl);
+}
+
+.emptyText {
+  color: var(--text-tertiary);
+}
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-4) var(--space-4);
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+
+  .title {
+    font-size: var(--text-xl);
+  }
+
+  .btnCreate {
+    text-align: center;
+  }
+
+  /* Hide actual table, show card layout */
+  .table thead {
+    display: none;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table tr {
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--border-subtle);
+    position: relative;
+  }
+
+  .table td {
+    padding: var(--space-1) 0;
+    border-bottom: none;
+    text-align: left !important;
+  }
+
+  .table td:first-child {
+    padding-bottom: var(--space-2);
+  }
+
+  .alignRight {
+    text-align: left !important;
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+  }
+
+  .productCell {
+    gap: var(--space-3);
+  }
+
+  .price {
+    font-size: var(--text-base);
+  }
+
+  .btnAction {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-subtle);
+    border-radius: var(--radius-pill);
+  }
+}

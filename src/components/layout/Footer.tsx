@@ -22,9 +22,9 @@ export default function Footer() {
           <h4 className={styles.columnTitle}>Tienda</h4>
           <ul className={styles.list}>
             <li><Link href="/tienda">Ver todo</Link></li>
-            <li><Link href="/tienda?cat=vestidos">Vestidos</Link></li>
-            <li><Link href="/tienda?cat=camisas">Camisas</Link></li>
-            <li><Link href="/tienda?cat=pantalones">Pantalones</Link></li>
+            <li><Link href="/tienda?cat=Vestidos">Vestidos</Link></li>
+            <li><Link href="/tienda?cat=Camisas">Camisas</Link></li>
+            <li><Link href="/tienda?cat=Pantalones">Pantalones</Link></li>
           </ul>
         </div>
 
@@ -43,18 +43,18 @@ export default function Footer() {
           <h4 className={styles.columnTitle}>Contacto</h4>
           <ul className={styles.list}>
             <li>
-              <a href="https://instagram.com/glak.ar" target="_blank" rel="noopener noreferrer">
+              <a href="https://instagram.com/glak_tienda" target="_blank" rel="noopener noreferrer">
                 Instagram
               </a>
             </li>
             <li>
-              <a href="https://wa.me/543436000000" target="_blank" rel="noopener noreferrer">
+              <a href="https://wa.me/5491169675050" target="_blank" rel="noopener noreferrer">
                 WhatsApp
               </a>
             </li>
             <li>
-              <a href="mailto:hola@glak.com.ar">
-                hola@glak.com.ar
+              <a href="mailto:adrigglak@gmail.com">
+                adrigglak@gmail.com
               </a>
             </li>
           </ul>

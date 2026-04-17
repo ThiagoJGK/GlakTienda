@@ -1,14 +1,21 @@
 .bottomNav {
   position: fixed;
-  bottom: var(--space-3);
-  left: var(--space-3);
-  right: var(--space-3);
+  bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px)); /* Slightly higher + safe area */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px; /* Narrower pill */
   z-index: var(--z-navbar);
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  padding: var(--space-2) var(--space-1);
-  border-radius: var(--radius-xl);
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-pill);
+  height: 64px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(86, 130, 3, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 /* Hide on desktop */
@@ -22,21 +29,44 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  min-width: 56px;
-  min-height: 44px;
-  padding: var(--space-1);
-  border-radius: var(--radius-md);
+  justify-content: center;
   color: var(--text-tertiary);
-  text-decoration: none;
-  font-size: 0.625rem;
-  font-weight: 500;
-  font-family: var(--font-outfit), system-ui, sans-serif;
-  transition: color var(--transition-fast);
+  transition: all var(--transition-base);
   -webkit-tap-highlight-color: transparent;
+  width: 44px;
+  height: 44px;
 }
 
 .item:hover,
 .item:active {
   color: var(--accent-primary);
+  transform: scale(1.1);
+}
+
+.itemMain {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  transform: translateY(-22px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mainIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  background-color: var(--accent-primary);
+  color: #FFFFFF;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 8px 24px rgba(86, 130, 3, 0.3);
+  transition: transform var(--transition-spring);
+}
+
+.itemMain:active .mainIconWrapper {
+  transform: scale(0.9);
 }

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from './SectionTitle.module.css';
 
 interface SectionTitleProps {
@@ -27,12 +28,12 @@ export default function SectionTitle({
         {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
       </div>
       {action && (
-        <a href={action.href} className={styles.action}>
+        <Link href={action.href} className={styles.action}>
           {action.label}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
-        </a>
+        </Link>
       )}
     </div>
   );

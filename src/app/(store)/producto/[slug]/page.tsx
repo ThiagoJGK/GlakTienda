@@ -1,180 +1,145 @@
 import styles from './page.module.css';
 import ProductCard from '@/components/ui/ProductCard';
-import SectionTitle from '@/components/ui/SectionTitle';
+import ProductOptions from '@/components/ui/ProductOptions';
+import { createClient } from '@/lib/supabase/server';
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 
-const sizes = ['XS', 'S', 'M', 'L', 'XL'];
-const colors = [
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dpm4judv4";
+
+function resolveImageUrl(img: string) {
+  if (img.startsWith('http')) return img;
+  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_800,h_1200,q_80/${img}`;
+}
+
+function resolveThumbUrl(img: string) {
+  if (img.startsWith('http')) return img;
+  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_400,h_530,q_75/${img}`;
+}
+
+const defaultSizes = ['XS', 'S', 'M', 'L', 'XL'];
+const defaultColors = [
   { name: 'Natural', hex: '#D4C5A9' },
   { name: 'Terracotta', hex: '#C27852' },
   { name: 'Oliva', hex: '#7A8450' },
 ];
 
-const images = [
-  'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=700&h=930&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=700&h=930&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=700&h=930&fit=crop&q=80',
-];
+// Dynamic SEO metadata for each product
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data: product } = await supabase
+    .from('products')
+    .select('name, description, category, images')
+    .eq('slug', slug)
+    .single();
 
-const relatedProducts = [
-  {
-    name: 'Camisa Orgánica Blanca',
-    price: 14500,
-    image: 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=400&h=530&fit=crop&q=75',
-    href: '/producto/camisa-organica-blanca',
-    category: 'CAMISAS',
-  },
-  {
-    name: 'Pantalón Wide Leg Oliva',
-    price: 21300,
-    image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&h=530&fit=crop&q=75',
-    href: '/producto/pantalon-wide-leg-oliva',
-    category: 'PANTALONES',
-  },
-  {
-    name: 'Blazer Estructurado Beige',
-    price: 28700,
-    image: 'https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=400&h=530&fit=crop&q=75',
-    href: '/producto/blazer-estructurado-beige',
-    category: 'ABRIGOS',
-  },
-  {
-    name: 'Blusa Satinada Champagne',
-    price: 16800,
-    image: 'https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=400&h=530&fit=crop&q=75',
-    href: '/producto/blusa-satinada-champagne',
-    category: 'BLUSAS',
-  },
-];
+  if (!product) return { title: 'Producto no encontrado' };
 
-export default function ProductoPage() {
-  const price = 18900;
-  const installment = Math.round(price / 3);
+  const image = product.images?.[0]
+    ? resolveImageUrl(product.images[0])
+    : undefined;
+
+  return {
+    title: product.name,
+    description: product.description || `${product.name} — Moda femenina en Glak. ${product.category || ''}`,
+    openGraph: {
+      title: `${product.name} | Glak`,
+      description: product.description || `Descubrí ${product.name} en Glak`,
+      images: image ? [{ url: image, width: 800, height: 1200 }] : [],
+    },
+  };
+}
+
+export default async function ProductoPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const supabase = await createClient();
+
+  const { data: product, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error || !product) {
+    notFound();
+  }
+
+  // Fetch related products (same category, exclude current)
+  const { data: related } = await supabase
+    .from('products')
+    .select('*')
+    .eq('status', 'active')
+    .neq('id', product.id)
+    .limit(2);
+
+  const relatedProducts = related || [];
+
+  // Resolve images
+  const productImages = product.images && product.images.length > 0
+    ? product.images.map((img: string) => resolveImageUrl(img))
+    : ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=1200&fit=crop&q=80'];
+
+  // Resolve sizes and colors
+  const sizes = product.sizes && product.sizes.length > 0 ? product.sizes : defaultSizes;
+  const colors = product.colors && product.colors.length > 0 ? product.colors : defaultColors;
 
   return (
     <div className={styles.page}>
-      <div className="container">
-        <div className={styles.layout}>
-          {/* Image gallery */}
-          <div className={styles.gallery}>
-            <div className={styles.mainImage}>
-              <img
-                src={images[0]}
-                alt="Vestido Lino Natural — Vista frontal"
-                className={styles.image}
-                fetchPriority="high"
-              />
-            </div>
-            <div className={styles.thumbs}>
-              {images.map((img, i) => (
-                <button key={i} className={`${styles.thumb} ${i === 0 ? styles.thumbActive : ''}`}>
-                  <img src={img} alt={`Vista ${i + 1}`} loading="lazy" decoding="async" />
-                </button>
-              ))}
-            </div>
-          </div>
+      <div className={styles.layout}>
+        {/* Interactive gallery + options (Client Component) */}
+        <ProductOptions
+          product={{
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            slug: product.slug,
+          }}
+          images={productImages}
+          sizes={sizes}
+          colors={colors}
+        />
 
-          {/* Product info */}
+        {/* Product info container */}
+        <div className="container">
           <div className={styles.info}>
-            <span className={styles.category}>VESTIDOS</span>
-            <h1 className={styles.productName}>Vestido Lino Natural</h1>
-
-            <div className={styles.priceBlock}>
+            <div className={styles.headerRow}>
+              <div>
+                <h1 className={styles.productName}>{product.name}</h1>
+                <span className={styles.brand}>{product.category || 'Glak Originals'}</span>
+              </div>
               <span className={`${styles.price} font-editorial`}>
-                ${price.toLocaleString('es-AR')}
-              </span>
-              <span className={styles.installments}>
-                3 cuotas sin interés de ${installment.toLocaleString('es-AR')}
+                ${product.price?.toLocaleString('es-AR')}
               </span>
             </div>
 
-            {/* Color selector */}
-            <div className={styles.optionGroup}>
-              <span className={styles.optionLabel}>Color: <strong>Natural</strong></span>
-              <div className={styles.colorSwatches}>
-                {colors.map((c, i) => (
-                  <button
-                    key={c.name}
-                    className={`${styles.swatch} ${i === 0 ? styles.swatchActive : ''}`}
-                    style={{ backgroundColor: c.hex }}
-                    title={c.name}
-                    aria-label={`Color ${c.name}`}
-                    id={`color-${c.name.toLowerCase()}`}
-                  />
-                ))}
+            {/* Description */}
+            {product.description && (
+              <div className={styles.description}>
+                <p>{product.description}</p>
               </div>
-            </div>
+            )}
 
-            {/* Size selector */}
-            <div className={styles.optionGroup}>
-              <div className={styles.sizeHeader}>
-                <span className={styles.optionLabel}>Talle: <strong>M</strong></span>
-                <a href="#guia-talles" className={styles.sizeGuide}>Guía de talles</a>
-              </div>
-              <div className={styles.sizeChips}>
-                {sizes.map((s) => (
-                  <button
-                    key={s}
-                    className={`${styles.sizeChip} ${s === 'M' ? styles.sizeChipActive : ''}`}
-                    id={`size-${s.toLowerCase()}`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* CTA */}
-            <button className={`btn btn-primary btn-lg btn-block ${styles.addToCart}`} id="add-to-cart-btn">
-              Agregar al carrito
-            </button>
-
-            {/* Trust */}
-            <div className={styles.trustRow}>
-              <span>🚚 Envío gratis +$25.000</span>
-              <span>🔄 Devolución 10 días</span>
-              <span>🔒 Compra segura</span>
-            </div>
-
-            {/* Description accordion */}
-            <details className={styles.accordion} open>
-              <summary className={styles.accordionTitle}>Descripción</summary>
-              <div className={styles.accordionContent}>
-                <p>
-                  Vestido de lino natural con caída fluida y silueta relajada.
-                  Perfecto para la temporada de otoño. Fabricado con fibras
-                  100% naturales de origen responsable.
-                </p>
-                <ul>
-                  <li>Composición: 100% lino</li>
-                  <li>Largo: midi (por debajo de la rodilla)</li>
-                  <li>Escote: V pronunciado</li>
-                  <li>Cierre: botones frontales</li>
-                  <li>Bolsillos laterales</li>
-                </ul>
-              </div>
-            </details>
-
-            <details className={styles.accordion}>
-              <summary className={styles.accordionTitle}>Cuidados</summary>
-              <div className={styles.accordionContent}>
-                <p>Lavar a mano o ciclo delicado. No usar secadora. Planchar a temperatura media.</p>
-              </div>
-            </details>
+            {/* Lookbook Contextual Shopping */}
+            {relatedProducts.length > 0 && (
+              <section className={styles.lookbookSection}>
+                <h3 className={styles.lookbookTitle}>Completá el look</h3>
+                <div className={styles.lookbookGrid}>
+                  {relatedProducts.map((p) => (
+                    <ProductCard
+                      key={p.id}
+                      name={p.name}
+                      price={p.price}
+                      image={p.images?.[0] ? resolveThumbUrl(p.images[0]) : 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=530&fit=crop&q=75'}
+                      href={`/producto/${p.slug}`}
+                      category={p.category?.toUpperCase()}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         </div>
-
-        {/* Recommendations: "Completá el look" */}
-        <section className={`section ${styles.recsSection}`}>
-          <SectionTitle
-            title="Completá el look"
-            action={{ label: 'Ver más', href: '/tienda' }}
-          />
-          <div className={styles.recsGrid}>
-            {relatedProducts.map((p) => (
-              <ProductCard key={p.name} {...p} />
-            ))}
-          </div>
-        </section>
       </div>
     </div>
   );

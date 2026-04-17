@@ -1,0 +1,247 @@
+/* === Gallery === */
+.gallery {
+  position: relative;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .gallery {
+    flex: 0 0 50%;
+    position: sticky;
+    top: 80px;
+    align-self: flex-start;
+  }
+}
+
+.mainImageWrapper {
+  position: relative;
+  width: 100%;
+  height: 55vh;
+  background: var(--bg-subtle);
+  border-bottom-left-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  user-select: none;
+  touch-action: pan-y;
+}
+
+@media (min-width: 768px) {
+  .mainImageWrapper {
+    height: auto;
+    aspect-ratio: 3 / 4;
+    border-radius: var(--radius-xl);
+  }
+}
+
+.mainImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: opacity 0.3s ease;
+}
+
+.favoriteBtn {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-surface);
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-bounce);
+}
+
+.favoriteBtn:hover, .favoriteBtn:active {
+  color: var(--text-primary);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Navigation arrows */
+.navArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background-color: rgba(255, 255, 255, 0.85);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+  opacity: 0;
+}
+
+.mainImageWrapper:hover .navArrow {
+  opacity: 1;
+}
+
+.navArrow:hover {
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.navLeft { left: var(--space-3); }
+.navRight { right: var(--space-3); }
+
+/* Show arrows always on mobile (touch targets) */
+@media (max-width: 767px) {
+  .navArrow {
+    display: none;
+  }
+}
+
+/* Pagination dots */
+.paginationDots {
+  position: absolute;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  z-index: 10;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background-color: rgba(255, 255, 255, 0.4);
+  transition: all var(--transition-base);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.dotActive {
+  width: 24px;
+  background-color: var(--bg-surface);
+}
+
+
+/* === Options === */
+.optionGroup {
+  margin-bottom: var(--space-6);
+}
+
+.optionLabel {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.optionLabel strong {
+  color: var(--text-primary);
+}
+
+/* Color */
+.colorSwatches {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-bounce);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+  padding: 0;
+}
+
+.swatch:hover {
+  transform: scale(1.1);
+}
+
+.swatchActive {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--bg-primary), 0 0 0 5px var(--accent-primary);
+}
+
+/* Size */
+.sizeHeader {
+  margin-bottom: var(--space-3);
+}
+
+.sizeChips {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.sizeChip {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-size: var(--text-base);
+  font-weight: 500;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.sizeChip:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.sizeChipActive {
+  background-color: var(--accent-primary);
+  color: var(--bg-surface);
+  border-color: var(--accent-primary);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+/* CTA */
+.ctaRow {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-10);
+}
+
+.btnCart {
+  flex: 1;
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-radius: var(--radius-xl);
+}
+
+.btnCart:hover {
+  background-color: var(--bg-subtle);
+}
+
+.btnBuy {
+  flex: 1;
+  background-color: var(--text-primary);
+  color: var(--bg-surface);
+  border-radius: var(--radius-xl);
+}
+
+.btnBuy:hover {
+  background-color: #000;
+  box-shadow: var(--shadow-lg);
+}

@@ -1,110 +1,135 @@
-.hero {
+.heroSection {
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-8);
+}
+
+/* Minimalist Search Bar */
+.searchContainer {
+  margin-bottom: var(--space-6);
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-pill);
+  padding: var(--space-2) var(--space-4);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.searchIcon {
+  color: var(--text-tertiary);
+  margin-right: var(--space-2);
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  padding: var(--space-2) 0;
+}
+
+.searchInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Hero Slider Card */
+.sliderCard {
   position: relative;
   width: 100%;
-  min-height: 85vh;
-  min-height: 85svh;
-  display: flex;
-  align-items: flex-end;
+  border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-md);
+  aspect-ratio: 4 / 5;
 }
 
-.imageWrapper {
-  position: absolute;
-  inset: 0;
+@media (min-width: 768px) {
+  .sliderCard {
+    aspect-ratio: 21 / 9;
+  }
 }
 
-.image {
+.sliderImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 20%;
+  display: block;
 }
 
-.overlay {
+.sliderOverlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.65) 0%,
-    rgba(0, 0, 0, 0.25) 40%,
-    rgba(0, 0, 0, 0.05) 70%,
-    transparent 100%
+    to bottom right,
+    rgba(26, 26, 26, 0.7) 0%,
+    rgba(26, 26, 26, 0.3) 50%,
+    rgba(0, 0, 0, 0.6) 100%
   );
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-6);
 }
 
-.content {
-  position: relative;
-  z-index: 1;
-  padding: var(--space-8) var(--container-padding);
-  padding-bottom: var(--space-12);
-  width: 100%;
-  max-width: var(--container-max);
-  margin-inline: auto;
+.sliderContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .tagline {
-  display: inline-block;
-  font-family: var(--font-outfit), system-ui, sans-serif;
   font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--bg-secondary);
-  margin-bottom: var(--space-3);
-  padding: var(--space-1) var(--space-3);
   background: rgba(86, 130, 3, 0.4);
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-pill);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  margin-bottom: var(--space-3);
+  backdrop-filter: blur(4px);
 }
 
 .title {
-  font-size: clamp(2.5rem, 2rem + 3vw, 4.5rem);
-  font-weight: 400;
-  line-height: 1.05;
   color: #FFFFFF;
+  font-size: clamp(2rem, 1.5rem + 5vw, 4rem);
+  line-height: 1.1;
   margin-bottom: var(--space-4);
 }
 
-.title em {
-  font-style: italic;
-  color: var(--bg-secondary);
-}
-
-.subtitle {
-  font-size: var(--text-lg);
-  color: rgba(255, 255, 255, 0.85);
-  font-family: var(--font-inter), system-ui, sans-serif;
-  margin-bottom: var(--space-8);
-  max-width: 380px;
-}
-
 .cta {
-  display: inline-flex;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.cta:hover {
+  background-color: var(--bg-subtle);
+  color: var(--accent-primary);
+}
+
+/* Pagination Dots */
+.dotsContainer {
+  display: flex;
   gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-start;
 }
 
-/* Desktop: taller hero, larger type */
-@media (min-width: 768px) {
-  .hero {
-    min-height: 90vh;
-  }
-
-  .content {
-    padding-bottom: var(--space-16);
-  }
-
-  .title {
-    max-width: 700px;
-  }
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background-color: rgba(255, 255, 255, 0.4);
+  transition: all var(--transition-base);
 }
 
-@media (min-width: 1024px) {
-  .hero {
-    min-height: 92vh;
-  }
-
-  .content {
-    padding-bottom: var(--space-20);
-  }
+.dotActive {
+  width: 24px;
+  background-color: var(--accent-primary);
 }

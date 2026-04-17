@@ -1,0 +1,29 @@
+.ctaRow {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-10);
+}
+
+.btnCart {
+  flex: 1;
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-radius: var(--radius-xl);
+}
+
+.btnCart:hover {
+  background-color: var(--bg-subtle);
+}
+
+.btnBuy {
+  flex: 1;
+  background-color: var(--text-primary);
+  color: var(--bg-surface);
+  border-radius: var(--radius-xl);
+}
+
+.btnBuy:hover {
+  background-color: #000;
+  box-shadow: var(--shadow-lg);
+}

@@ -1,27 +1,28 @@
+import Link from 'next/link';
 import styles from './CategoriesBento.module.css';
 
 const categories = [
   {
     name: 'Vestidos',
-    slug: '/tienda?cat=vestidos',
+    slug: '/tienda?cat=Vestidos',
     image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&h=800&fit=crop&q=75',
     span: 'tall',
   },
   {
     name: 'Camisas',
-    slug: '/tienda?cat=camisas',
+    slug: '/tienda?cat=Camisas',
     image: 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=600&h=600&fit=crop&q=75',
     span: 'normal',
   },
   {
     name: 'Pantalones',
-    slug: '/tienda?cat=pantalones',
+    slug: '/tienda?cat=Pantalones',
     image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&h=600&fit=crop&q=75',
     span: 'normal',
   },
   {
     name: 'Accesorios',
-    slug: '/tienda?cat=accesorios',
+    slug: '/tienda?cat=Accesorios',
     image: 'https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=600&h=800&fit=crop&q=75',
     span: 'wide',
   },
@@ -36,7 +37,7 @@ export default function CategoriesBento() {
         </h2>
         <div className={styles.grid}>
           {categories.map((cat) => (
-            <a
+            <Link
               key={cat.name}
               href={cat.slug}
               className={`${styles.card} ${styles[cat.span]}`}
@@ -56,7 +57,7 @@ export default function CategoriesBento() {
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

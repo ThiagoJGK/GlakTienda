@@ -148,3 +148,24 @@
   justify-content: center;
   margin-top: var(--space-10);
 }
+
+/* Empty state */
+.emptyState {
+  padding: 60px 20px;
+  text-align: center;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-subtle);
+}
+
+.emptyState p {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.emptyState span {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+

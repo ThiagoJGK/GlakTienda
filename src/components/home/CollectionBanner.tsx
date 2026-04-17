@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from './CollectionBanner.module.css';
 
 export default function CollectionBanner() {
@@ -13,9 +14,9 @@ export default function CollectionBanner() {
             Texturas naturales, siluetas fluidas y una paleta que abraza la tierra.
             Prendas diseñadas para acompañar tu día con elegancia consciente.
           </p>
-          <a href="/tienda?col=otono-2026" className={`btn btn-primary ${styles.cta}`} id="collection-cta">
+          <Link href="/tienda" className={`btn btn-primary ${styles.cta}`} id="collection-cta">
             Descubrir
-          </a>
+          </Link>
         </div>
         <div className={styles.imageWrapper}>
           <img
