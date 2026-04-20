@@ -80,9 +80,48 @@ export default async function ProductoPage({ params }: { params: Promise<{ slug:
     ? product.images.map((img: string) => resolveImageUrl(img))
     : ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=1200&fit=crop&q=80'];
 
-  // Resolve sizes and colors
-  const sizes = product.sizes && product.sizes.length > 0 ? product.sizes : defaultSizes;
-  const colors = product.colors && product.colors.length > 0 ? product.colors : defaultColors;
+  // Normalization logic for sizes and colors (handles both simple arrays and Bulk Upload complex objects)
+  let sizes = defaultSizes;
+  let colors = defaultColors;
+
+  if (Array.isArray(product.sizes) && product.sizes.length > 0) {
+    const firstItem = product.sizes[0];
+    // Check if it's the complex ColorVariation format: { hex, name, sizes: [...] }
+    if (typeof firstItem === 'object' && firstItem !== null && 'sizes' in firstItem && Array.isArray(firstItem.sizes)) {
+      // 1. Extract unique size names from all color variations
+      const allSizeNames = new Set<string>();
+      product.sizes.forEach((variation: any) => {
+        if (Array.isArray(variation.sizes)) {
+          variation.sizes.forEach((s: any) => {
+            if (s.name) allSizeNames.add(s.name);
+          });
+        }
+      });
+      const uniqueSizes = Array.from(allSizeNames);
+      if (uniqueSizes.length > 0) sizes = uniqueSizes;
+
+      // 2. Extract colors from the variations
+      colors = product.sizes.map((v: any) => ({
+        name: v.name || 'Color',
+        hex: v.hex || '#cccccc'
+      }));
+    } else {
+      // Legacy or simple format: sizes could be string[] or [{name, stock}][]
+      sizes = product.sizes.map((s: any) => {
+        if (typeof s === 'object' && s !== null && 'name' in s) return s.name;
+        return typeof s === 'string' ? s : null;
+      }).filter(Boolean);
+
+      if (sizes.length === 0) sizes = defaultSizes;
+
+      if (product.colors && product.colors.length > 0) {
+        colors = product.colors;
+      }
+    }
+  } else if (product.colors && product.colors.length > 0) {
+    // If only colors are defined but no sizes (unlikely but possible)
+    colors = product.colors;
+  }
 
   return (
     <div className={styles.page}>
