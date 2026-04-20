@@ -8,6 +8,16 @@
   to { opacity: 1; }
 }
 
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0.8; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 .backdrop {
   position: fixed;
   inset: 0;
@@ -15,6 +25,10 @@
   backdrop-filter: blur(4px);
   z-index: calc(var(--z-navbar) + 1);
   animation: fadeIn 0.3s ease-out forwards;
+}
+
+.backdrop.closing {
+  animation: fadeOut 0.4s ease-in forwards;
 }
 
 .drawer {
@@ -33,6 +47,10 @@
   border-left: 1px solid rgba(86, 130, 3, 0.05);
   border-top-left-radius: var(--radius-xl);
   border-bottom-left-radius: var(--radius-xl);
+}
+
+.drawer.closing {
+  animation: slideOutRight 0.4s cubic-bezier(0.36, 0, 0.24, 1) forwards;
 }
 
 /* Header */

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCartStore } from "@/stores/cartStore";
 import styles from "./Navbar.module.css";
 import dynamic from 'next/dynamic';
@@ -14,9 +14,26 @@ export default function Navbar() {
   const totalItems = useCartStore((s) => s.totalItems);
   const count = totalItems();
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Check initial scroll position
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <>
-      <header className={`glass-navbar ${styles.navbar}`}>
+      <div className={`${styles.blurFade} ${isScrolled ? styles.visible : ''}`} />
+      <header className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}>
         <nav className={`container ${styles.nav}`} aria-label="Navegación principal">
           
           {/* Left: Hamburger */}
@@ -36,9 +53,15 @@ export default function Navbar() {
 
           {/* Center: Logo */}
           <div className={styles.centerLogo}>
-            <Link href="/" className={styles.logo} aria-label="Glak — Inicio">
-              <span className="font-heading">GLAK</span>
-            </Link>
+            <div className={`${styles.logoCircle} ${isScrolled ? 'glass-navbar' : ''}`}>
+              <Link href="/" className={styles.logo} aria-label="Glak — Inicio">
+                <img 
+                  src="/assets/logo_glak.jpg" 
+                  alt="Glak Logo" 
+                  className={styles.logoImage}
+                />
+              </Link>
+            </div>
           </div>
 
           {/* Right: Cart */}

@@ -13,8 +13,31 @@ export default function TallesPage() {
         Guía de Talles
       </h1>
       <p style={{ fontSize: 'var(--text-base)', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.6 }}>
-        Encontrá tu talle ideal. Todas las medidas están en centímetros.
+        Antes de ver la tabla tradicional, tené en cuenta cómo se diseña nuestra colección europea.
       </p>
+
+      {/* Italian Fashion Manifesto Info */}
+      <div style={{
+        padding: '1.5rem',
+        background: 'var(--bg-surface)',
+        borderRadius: 'var(--radius-xl)',
+        border: '1px solid var(--accent-primary)',
+        marginBottom: '2rem',
+        boxShadow: '0 4px 12px rgba(86, 130, 3, 0.05)'
+      }}>
+        <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, marginBottom: '1rem', color: 'var(--accent-primary)' }}>
+          🇮🇹 Nota sobre la Colección Italiana
+        </h2>
+        <div style={{ fontSize: 'var(--text-md)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+          <p style={{marginBottom: '1rem'}}>
+            Fiel a su estética y caída natural europea, nuestra <strong>Colección de Lino Italiano se maneja en "Talle Único" orgánico.</strong>
+          </p>
+          <p>
+            Esto significa que las prendas tienen un corte diseñado específicamente de forma holgada.
+            Gracias al peso y caída premium de la tela, <strong>se adaptan y estilizan al instante cualquier figura</strong>, garantizando comodidad sin apretar ni marcar.
+          </p>
+        </div>
+      </div>
 
       {/* Size table */}
       <div style={{ overflowX: 'auto', marginBottom: '2rem' }}>

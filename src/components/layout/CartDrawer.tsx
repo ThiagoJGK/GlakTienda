@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import styles from './CartDrawer.module.css';
 
@@ -16,18 +16,31 @@ function formatPrice(price: number) {
 
 export default function CartDrawer() {
   const { items, isOpen, close, updateQuantity, removeItem, totalItems, totalPrice, freeShippingRemaining } = useCartStore();
+  const [shouldRender, setShouldRender] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
-  // Lock body scroll when open
+  // Handle open/close state with animation timing
   useEffect(() => {
     if (isOpen) {
+      setShouldRender(true);
+      setIsClosing(false);
       document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset';
+      if (shouldRender) {
+        setIsClosing(true);
+        const timer = setTimeout(() => {
+          setShouldRender(false);
+          setIsClosing(false);
+          document.body.style.overflow = 'unset';
+        }, 400); // Wait for the slideOutRight CSS animation
+        return () => clearTimeout(timer);
+      } else {
+        document.body.style.overflow = 'unset';
+      }
     }
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [isOpen]);
+  }, [isOpen, shouldRender]);
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   const total = totalPrice();
   const count = totalItems();
@@ -36,8 +49,8 @@ export default function CartDrawer() {
 
   return (
     <>
-      <div className={styles.backdrop} onClick={close} />
-      <aside className={styles.drawer} aria-label="Carrito de compras">
+      <div className={`${styles.backdrop} ${isClosing ? styles.closing : ''}`} onClick={close} />
+      <aside className={`${styles.drawer} ${isClosing ? styles.closing : ''}`} aria-label="Carrito de compras">
         {/* Header */}
         <div className={styles.header}>
           <h2 className={styles.title}>

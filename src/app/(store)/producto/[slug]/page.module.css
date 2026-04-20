@@ -10,11 +10,20 @@
 
 @media (min-width: 768px) {
   .layout {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-8);
     padding: var(--space-8) var(--container-padding);
     max-width: var(--container-max);
     margin: 0 auto;
+    align-items: start;
+  }
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: 1fr 420px;
+    gap: var(--space-12);
   }
 }
 
@@ -28,7 +37,7 @@
   .gallery {
     flex: 0 0 50%;
     position: sticky;
-    top: 80px;
+    top: 130px;
     align-self: flex-start;
   }
 }

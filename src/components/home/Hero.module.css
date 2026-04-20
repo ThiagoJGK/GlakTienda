@@ -14,12 +14,18 @@
   background-color: var(--bg-surface);
   border-radius: var(--radius-pill);
   padding: var(--space-2) var(--space-4);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+  border: 1.5px solid var(--border-strong);
+  transition: all var(--transition-base);
+}
+
+.searchBar:focus-within {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent-primary);
 }
 
 .searchIcon {
-  color: var(--text-tertiary);
+  color: var(--accent-primary);
   margin-right: var(--space-2);
 }
 
@@ -35,7 +41,8 @@
 }
 
 .searchInput::placeholder {
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* Hero Slider Card */

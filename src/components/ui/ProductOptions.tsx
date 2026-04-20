@@ -15,9 +15,10 @@ interface ProductOptionsProps {
   images: string[];
   sizes: string[];
   colors: { name: string; hex: string }[];
+  children?: React.ReactNode;
 }
 
-export default function ProductOptions({ product, images, sizes, colors }: ProductOptionsProps) {
+export default function ProductOptions({ product, images, sizes, colors, children }: ProductOptionsProps) {
   const [selectedSize, setSelectedSize] = useState(sizes[2] || sizes[0] || 'M');
   const [selectedColor, setSelectedColor] = useState(colors[0]?.name || 'Natural');
   const [currentImage, setCurrentImage] = useState(0);
@@ -114,48 +115,81 @@ export default function ProductOptions({ product, images, sizes, colors }: Produ
         </div>
       </div>
 
-      {/* Color selector */}
-      <div className={styles.optionGroup}>
-        <span className={styles.optionLabel}>Color: <strong>{selectedColor}</strong></span>
-        <div className={styles.colorSwatches}>
-          {colors.map((c) => (
-            <button
-              key={c.name}
-              className={`${styles.swatch} ${selectedColor === c.name ? styles.swatchActive : ''}`}
-              style={{ backgroundColor: c.hex }}
-              aria-label={`Color ${c.name}`}
-              onClick={() => setSelectedColor(c.name)}
-            />
-          ))}
-        </div>
-      </div>
+      {/* Info Column containing all options and children */}
+      <div className={styles.infoColumn}>
+        {/* Render children (like Title and Price) first, so they stay on top */}
+        {children}
 
-      {/* Size selector */}
-      <div className={styles.optionGroup}>
-        <div className={styles.sizeHeader}>
-          <span className={styles.optionLabel}>Talle seleccionado: <strong>{selectedSize}</strong></span>
+        {/* Color selector */}
+        <div className={styles.optionGroup}>
+          <span className={styles.optionLabel}>Color: <strong>{selectedColor}</strong></span>
+          <div className={styles.colorSwatches}>
+            {colors.map((c) => (
+              <button
+                key={c.name}
+                className={`${styles.swatch} ${selectedColor === c.name ? styles.swatchActive : ''}`}
+                style={{ backgroundColor: c.hex }}
+                aria-label={`Color ${c.name}`}
+                onClick={() => setSelectedColor(c.name)}
+              />
+            ))}
+          </div>
         </div>
-        <div className={styles.sizeChips}>
-          {sizes.map((s) => (
-            <button
-              key={s}
-              className={`${styles.sizeChip} ${selectedSize === s ? styles.sizeChipActive : ''}`}
-              onClick={() => setSelectedSize(s)}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {/* Dual CTA */}
-      <div className={styles.ctaRow}>
-        <button className={`btn btn-secondary ${styles.btnCart}`} onClick={handleAdd}>
-          Agregar al Carrito
-        </button>
-        <button className={`btn btn-primary ${styles.btnBuy}`} onClick={handleBuyNow}>
-          Comprar Ahora
-        </button>
+        {/* Size selector */}
+        <div className={styles.optionGroup}>
+          <div className={styles.sizeHeader}>
+            <span className={styles.optionLabel}>Talle seleccionado: <strong>{selectedSize}</strong></span>
+          </div>
+          <div className={styles.sizeChips}>
+            {sizes.map((s) => (
+              <button
+                key={s}
+                className={`${styles.sizeChip} ${selectedSize === s ? styles.sizeChipActive : ''}`}
+                onClick={() => setSelectedSize(s)}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Dual CTA */}
+        <div className={styles.ctaRow}>
+          <button className={`btn btn-secondary ${styles.btnCart}`} onClick={handleAdd}>
+            Agregar al Carrito
+          </button>
+          <button className={`btn btn-primary ${styles.btnBuy}`} onClick={handleBuyNow}>
+            Comprar Ahora
+          </button>
+        </div>
+
+        {/* Feature Accordions for visual balance */}
+        <div className={styles.accordions}>
+          <details className={styles.accordion}>
+            <summary className={styles.accordionTitle}>
+              <span>Envíos y devoluciones</span>
+              <svg className={styles.accordionIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
+            <div className={styles.accordionContent}>
+              <p>Envío gratis en compras superiores a $25.000. Tienes hasta 10 días desde que recibes el producto para solicitar un cambio o devolución de forma gratuita y sin complicaciones.</p>
+            </div>
+          </details>
+
+          <details className={styles.accordion}>
+            <summary className={styles.accordionTitle}>
+              <span>Cuidados de la prenda</span>
+              <svg className={styles.accordionIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
+            <div className={styles.accordionContent}>
+              <p>Lavar a mano o a máquina en ciclo delicado con agua fría. Secar a la sombra apoyado. No utilizar blanqueador ni calor excesivo para planchar.</p>
+            </div>
+          </details>
+        </div>
       </div>
     </>
   );

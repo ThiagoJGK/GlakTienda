@@ -245,3 +245,60 @@
   background-color: #000;
   box-shadow: var(--shadow-lg);
 }
+
+/* Info Column Structure */
+.infoColumn {
+  padding: 0 var(--container-padding);
+  padding-top: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .infoColumn {
+    padding: 0; /* padding handled safely by .layout grid */
+    position: sticky;
+    top: 100px;
+    max-width: 440px;
+  }
+}
+
+/* Accordions for extra content density */
+.accordions {
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.accordion {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.accordionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  list-style: none; /* remove weird default browser arrows */
+}
+
+.accordionTitle::-webkit-details-marker {
+  display: none;
+}
+
+.accordionIcon {
+  color: var(--text-tertiary);
+  transition: transform var(--transition-fast);
+}
+
+.accordion[open] .accordionIcon {
+  transform: rotate(180deg);
+}
+
+.accordionContent {
+  padding-bottom: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}

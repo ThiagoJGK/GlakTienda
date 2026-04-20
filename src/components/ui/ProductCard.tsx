@@ -56,14 +56,14 @@ export default function ProductCard({
           )}
           <h3 className={styles.name}>{name}</h3>
           <div className={styles.priceRow}>
-            <span className={`${styles.price} font-editorial`}>
+            <span className={`${styles.price} font-editorial`} suppressHydrationWarning>
               {formatPrice(price)}
             </span>
             {oldPrice && (
-              <span className={styles.oldPrice}>{formatPrice(oldPrice)}</span>
+              <span className={styles.oldPrice} suppressHydrationWarning>{formatPrice(oldPrice)}</span>
             )}
           </div>
-          <span className={styles.installments}>
+          <span className={styles.installments} suppressHydrationWarning>
             3 cuotas sin interés de {formatPrice(installments)}
           </span>
         </div>

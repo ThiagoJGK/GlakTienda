@@ -11,9 +11,10 @@ export default function Footer() {
             <span className="font-heading">GLAK</span>
           </Link>
           <p className={styles.tagline}>
-            Moda femenina con alma orgánica.
+            Preparado con amor desde Urdinarrain.<br/> 
+            Sentite libre, sentite Glak.
             <br />
-            Envíos a todo el país.
+            Envíos a todo el país 🇦🇷
           </p>
         </div>
 
@@ -21,9 +22,9 @@ export default function Footer() {
         <div className={styles.column}>
           <h4 className={styles.columnTitle}>Tienda</h4>
           <ul className={styles.list}>
-            <li><Link href="/tienda">Ver todo</Link></li>
+            <li><Link href="/tienda">Descubrí tu outfit</Link></li>
+            <li><Link href="/tienda?collection=italiana">Colección Italiana</Link></li>
             <li><Link href="/tienda?cat=Vestidos">Vestidos</Link></li>
-            <li><Link href="/tienda?cat=Camisas">Camisas</Link></li>
             <li><Link href="/tienda?cat=Pantalones">Pantalones</Link></li>
           </ul>
         </div>

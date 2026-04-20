@@ -9,8 +9,8 @@ const categories = [
     span: 'tall',
   },
   {
-    name: 'Camisas',
-    slug: '/tienda?cat=Camisas',
+    name: 'Colección Italiana',
+    slug: '/tienda?collection=italiana',
     image: 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=600&h=600&fit=crop&q=75',
     span: 'normal',
   },

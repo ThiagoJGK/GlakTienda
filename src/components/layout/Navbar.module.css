@@ -1,8 +1,43 @@
+/* ─── Navbar: Floating Pill ─── */
 .navbar {
   position: sticky;
-  top: 0;
+  top: 24px;
   z-index: var(--z-navbar);
-  height: 60px;
+  height: 64px;
+  max-width: 1200px;
+  margin: 0 auto 0 auto;
+  margin-inline: var(--space-4);
+  border-radius: var(--radius-pill);
+  /* overflow: visible so the logo circle can protrude */
+  overflow: visible;
+  transition: all var(--transition-base);
+}
+
+.blurFade {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  mask-image: linear-gradient(to bottom, black 25%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 25%, transparent 100%);
+  pointer-events: none;
+  z-index: calc(var(--z-navbar) - 1);
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+}
+
+.blurFade.visible {
+  opacity: 1;
+}
+
+/* On wider screens, center the pill */
+@media (min-width: 1280px) {
+  .navbar {
+    margin-inline: auto;
+  }
 }
 
 .nav {
@@ -21,15 +56,61 @@
 .centerLogo {
   display: flex;
   justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.logoCircle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) scale(1.1);
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  background-color: transparent;
+  border: 1px solid transparent;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0);
+  z-index: 10;
+  transition: transform var(--transition-base), background-color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
+  padding: 4px;
+}
+
+.logoCircle:hover {
+  transform: translateY(-50%) scale(1.15);
+}
+
+.scrolled .logoCircle {
+  transform: translateY(-50%) scale(0.90);
+  background-color: rgba(253, 251, 245, 0.72);
+  border-color: rgba(86, 130, 3, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.scrolled .logoCircle:hover {
+  transform: translateY(-50%) scale(1);
 }
 
 .logo {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: var(--accent-primary);
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
   transition: opacity var(--transition-fast);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.logoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image fills the circle */
 }
 
 .logo:hover {
@@ -46,18 +127,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
+  width: 60px;
   height: 44px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   color: var(--text-secondary);
-  transition: color var(--transition-fast), background-color var(--transition-fast);
+  background-color: rgba(255, 255, 255, 0);
+  border: 1px solid transparent;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), background-color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+
+.iconBtn:active {
+  transform: scale(0.92);
+}
+
+.scrolled .iconBtn {
+  background-color: rgba(253, 251, 245, 0.72);
+  border-color: rgba(86, 130, 3, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .iconBtn:hover {
   color: var(--accent-primary);
   background-color: var(--bg-subtle);
+  transform: translateY(-2px);
 }
 
 /* Cart button with badge */

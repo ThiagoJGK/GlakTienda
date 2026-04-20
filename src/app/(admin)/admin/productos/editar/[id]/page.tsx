@@ -1,23 +1,27 @@
 'use client';
 
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
-import styles from "./page.module.css";
+import { useState, useRef, useEffect, use } from "react";
+import styles from "../../crear/page.module.css";
 import { useRouter } from "next/navigation";
-import { createProductAction, getCollectionsAction } from "../actions";
+import { getCollectionsAction, updateProductAction } from "../../actions";
+import { createClient } from "@/lib/supabase/client";
 import ColorSizesSection, { ColorVariation } from "@/components/admin/ColorSizesSection";
 
 const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dpm4judv4";
-// Assuming the user has a hardcoded preset now. The user said to remove dev, so we'll hardcode 'GlakTienda' preset.
 const CLOUDINARY_UPLOAD_PRESET = "GlakTienda";
 
 
 
-export default function CreateProductPage() {
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   
+  // Next.js 15 async params
+  const { id } = use(params);
+
   // UI States
+  const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorObj, setErrorObj] = useState<string | null>(null);
 
@@ -31,7 +35,6 @@ export default function CreateProductPage() {
 
   // Colors & Sizes & Stock
   const [variations, setVariations] = useState<ColorVariation[]>([]);
-  
   const totalStock = variations.reduce((acc, v) => 
     acc + v.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0)
   , 0);
@@ -42,17 +45,91 @@ export default function CreateProductPage() {
   const [isAddingCollection, setIsAddingCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
 
-  useEffect(() => {
-    getCollectionsAction().then(res => {
-      if (res.success && res.data) {
-        setAllCollections(res.data);
-      }
-    });
-  }, []);
-
   // Cloudinary States
   const [images, setImages] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Load initial data
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // Load collections
+        const collRes = await getCollectionsAction();
+        if (collRes.success && collRes.data) {
+          setAllCollections(collRes.data);
+        }
+
+        // Load Product Data (Basic info first)
+        const supabase = createClient();
+        const { data: product, error: prdErr } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (prdErr || !product) {
+          setErrorObj("No se pudo cargar el producto. " + (prdErr?.message || ""));
+          setIsLoadingInitial(false);
+          return;
+        }
+
+        // Try to load collections separately to avoid crashing the whole page if relation fails
+        let productCollections: any[] = [];
+        try {
+           const { data: pcData, error: pcErr } = await supabase
+            .from('product_collections')
+            .select('collection_id')
+            .eq('product_id', id);
+            
+           if (!pcErr && pcData) {
+             productCollections = pcData;
+           }
+        } catch (e) {
+           console.warn("Could not load product collections", e);
+        }
+
+        setName(product.name || "");
+        setDescription(product.description || "");
+        setPrice(product.price ? product.price.toString() : "0");
+        setCategory(product.category || "");
+        setTags(product.tags ? product.tags.join(", ") : "");
+        setStatus(product.status || "draft");
+        setImages(product.images || []);
+        
+        if (product.sizes && Array.isArray(product.sizes)) {
+          if (product.sizes.length > 0 && typeof product.sizes[0].colorId === 'undefined') {
+            // Legacy flat format
+            setVariations([{
+               colorId: 'default',
+               name: 'Color Único',
+               hex: '#cccccc',
+               sizes: product.sizes
+            }]);
+          } else {
+            // New variations format
+            setVariations(product.sizes);
+          }
+        }
+
+        // Load selected collections based on pivot
+        if (productCollections.length > 0 && collRes.data) {
+          const selectedColls = productCollections.map((pc: any) => {
+            const match = collRes.data.find((c: any) => c.id === pc.collection_id);
+            return match ? { id: match.id, name: match.name } : null;
+          }).filter(Boolean);
+          setSelectedCollections(selectedColls);
+        }
+
+        setIsLoadingInitial(false);
+      } catch (err) {
+        console.error(err);
+        setErrorObj("Error crítico al cargar datos.");
+        setIsLoadingInitial(false);
+      }
+    }
+    
+    loadData();
+  }, [id]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -101,8 +178,8 @@ export default function CreateProductPage() {
     formData.append("name", name);
     formData.append("description", description);
     formData.append("price", price);
-    formData.append("stock", totalStock.toString()); // Total stock for basic filtering
-    formData.append("sizes", JSON.stringify(variations)); // The precise stock breakdown by color & size
+    formData.append("stock", totalStock.toString());
+    formData.append("sizes", JSON.stringify(variations));
     formData.append("category", category);
     formData.append("tags", tags);
     formData.append("status", status);
@@ -110,11 +187,11 @@ export default function CreateProductPage() {
     formData.append("collections", JSON.stringify(selectedCollections));
 
     try {
-      const result = await createProductAction(formData);
+      const result = await updateProductAction(id, formData);
       if (result.success) {
         router.push("/admin/productos");
       } else {
-        setErrorObj(result.error || "Falló la creación del producto.");
+        setErrorObj(result.error || "Falló la actualización del producto.");
         setIsSubmitting(false);
       }
     } catch (err) {
@@ -122,6 +199,10 @@ export default function CreateProductPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoadingInitial) {
+    return <div className={styles.container} style={{ textAlign: "center", padding: "100px 0" }}>Cargando datos del producto...</div>;
+  }
 
   return (
     <div className={styles.container}>
@@ -134,8 +215,8 @@ export default function CreateProductPage() {
             </svg>
           </Link>
           <div>
-            <h1 className={styles.title}>Nuevo Producto</h1>
-            <p className={styles.subtitle}>Agrega un artículo al catálogo.</p>
+            <h1 className={styles.title}>Editar Producto</h1>
+            <p className={styles.subtitle}>Modifica los datos del artículo.</p>
           </div>
         </div>
         <div className={styles.headerActions}>
@@ -148,7 +229,7 @@ export default function CreateProductPage() {
             className={`btn btn-primary ${styles.btnPublish} ${isSubmitting ? styles.loading : ''}`}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Publicando...' : 'Publicar Producto'}
+            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
           </button>
         </div>
       </header>

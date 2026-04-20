@@ -98,48 +98,44 @@ export default async function ProductoPage({ params }: { params: Promise<{ slug:
           images={productImages}
           sizes={sizes}
           colors={colors}
-        />
-
-        {/* Product info container */}
-        <div className="container">
-          <div className={styles.info}>
-            <div className={styles.headerRow}>
-              <div>
-                <h1 className={styles.productName}>{product.name}</h1>
-                <span className={styles.brand}>{product.category || 'Glak Originals'}</span>
-              </div>
-              <span className={`${styles.price} font-editorial`}>
-                ${product.price?.toLocaleString('es-AR')}
-              </span>
+        >
+          {/* Product info container (Title, Price, description) passed natively to sit above options */}
+          <div className={styles.headerRow}>
+            <div>
+              <h1 className={styles.productName}>{product.name}</h1>
+              <span className={styles.brand}>{product.category || 'Glak Originals'}</span>
             </div>
-
-            {/* Description */}
-            {product.description && (
-              <div className={styles.description}>
-                <p>{product.description}</p>
-              </div>
-            )}
-
-            {/* Lookbook Contextual Shopping */}
-            {relatedProducts.length > 0 && (
-              <section className={styles.lookbookSection}>
-                <h3 className={styles.lookbookTitle}>Completá el look</h3>
-                <div className={styles.lookbookGrid}>
-                  {relatedProducts.map((p) => (
-                    <ProductCard
-                      key={p.id}
-                      name={p.name}
-                      price={p.price}
-                      image={p.images?.[0] ? resolveThumbUrl(p.images[0]) : 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=530&fit=crop&q=75'}
-                      href={`/producto/${p.slug}`}
-                      category={p.category?.toUpperCase()}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
+            <span className={`${styles.price} font-editorial`}>
+              ${product.price?.toLocaleString('es-AR')}
+            </span>
           </div>
-        </div>
+
+          {/* Description */}
+          {product.description && (
+            <div className={styles.description}>
+              <p>{product.description}</p>
+            </div>
+          )}
+
+          {/* Lookbook Contextual Shopping */}
+          {relatedProducts.length > 0 && (
+            <section className={styles.lookbookSection}>
+              <h3 className={styles.lookbookTitle}>Completá el look</h3>
+              <div className={styles.lookbookGrid}>
+                {relatedProducts.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    name={p.name}
+                    price={p.price}
+                    image={p.images?.[0] ? resolveThumbUrl(p.images[0]) : 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=530&fit=crop&q=75'}
+                    href={`/producto/${p.slug}`}
+                    category={p.category?.toUpperCase()}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+        </ProductOptions>
       </div>
     </div>
   );

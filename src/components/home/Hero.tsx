@@ -21,10 +21,10 @@ export default function Hero() {
           />
           <div className={styles.sliderOverlay}>
             <div className={styles.sliderContent}>
-              <span className={styles.tagline}>NUEVA COLECCIÓN</span>
-              <h1 className={`${styles.title} font-editorial`}>Otoño<br/>Orgánico</h1>
+              <span className={styles.tagline}>NUEVA TEMPORADA 🍂✨</span>
+              <h1 className={`${styles.title} font-editorial`}>Dejanos<br/>ayudarte</h1>
               <Link href="/tienda" className={`btn btn-primary btn-sm ${styles.cta}`}>
-                Descubrir
+                Descubrí los outfits
               </Link>
             </div>
             
