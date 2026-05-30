@@ -16,8 +16,8 @@ export default async function AdminProductsPage() {
           <p className={styles.subtitle}>Gestiona tu catálogo, inventario y variaciones.</p>
         </div>
         <div className={styles.headerActions}>
-          <Link href="/admin/productos/carga-masiva" className={`btn-ghost`}>
-            Carga Masiva IA
+          <Link href="/admin/productos/carga-masiva" className={`btn btn-ghost ${styles.btnCreate}`}>
+            Importar con IA
           </Link>
           <Link href="/admin/productos/crear" className={`btn btn-primary ${styles.btnCreate}`}>
             + Nuevo Producto
