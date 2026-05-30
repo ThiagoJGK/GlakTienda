@@ -74,7 +74,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         }
 
         // Try to load collections separately to avoid crashing the whole page if relation fails
-        let productCollections: any[] = [];
+        let productCollections: { collection_id: string }[] = [];
         try {
            const { data: pcData, error: pcErr } = await supabase
             .from('product_collections')
@@ -82,7 +82,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             .eq('product_id', id);
             
            if (!pcErr && pcData) {
-             productCollections = pcData;
+             productCollections = pcData as { collection_id: string }[];
            }
         } catch (e) {
            console.warn("Could not load product collections", e);
@@ -113,10 +113,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
         // Load selected collections based on pivot
         if (productCollections.length > 0 && collRes.data) {
-          const selectedColls = productCollections.map((pc: any) => {
-            const match = collRes.data.find((c: any) => c.id === pc.collection_id);
+          const selectedColls = productCollections.map((pc) => {
+            const match = collRes.data.find((c) => c.id === pc.collection_id);
             return match ? { id: match.id, name: match.name } : null;
-          }).filter(Boolean);
+          }).filter(Boolean) as { id: string; name: string; isNew?: boolean }[];
           setSelectedCollections(selectedColls);
         }
 
@@ -194,7 +194,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         setErrorObj(result.error || "Falló la actualización del producto.");
         setIsSubmitting(false);
       }
-    } catch (err) {
+    } catch {
       setErrorObj("Ocurrió un error inesperado de conexión.");
       setIsSubmitting(false);
     }

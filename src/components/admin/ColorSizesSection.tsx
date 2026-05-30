@@ -30,18 +30,20 @@ export default function ColorSizesSection({ variations, onChange }: Props) {
   const [newColorHex, setNewColorHex] = useState('#000000');
   const [isSavingColor, setIsSavingColor] = useState(false);
 
-  useEffect(() => {
-    loadColors();
-  }, []);
-
-  const loadColors = async () => {
+  async function loadColors() {
     setIsLoadingColors(true);
     const res = await getColorsAction();
     if (res.success && res.data) {
       setGlobalColors(res.data);
     }
     setIsLoadingColors(false);
-  };
+  }
+
+  useEffect(() => {
+    setTimeout(() => {
+      loadColors();
+    }, 0);
+  }, []);
 
   const addVariation = (color: GlobalColor) => {
     if (variations.some(v => v.colorId === color.id)) return;

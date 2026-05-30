@@ -1,6 +1,7 @@
 'use client';
 
 export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+  console.error("Error boundary caught:", error);
   return (
     <div style={{
       minHeight: '70vh',

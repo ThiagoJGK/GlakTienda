@@ -30,7 +30,7 @@ export default function TallesPage() {
         </h2>
         <div style={{ fontSize: 'var(--text-md)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           <p style={{marginBottom: '1rem'}}>
-            Fiel a su estética y caída natural europea, nuestra <strong>Colección de Lino Italiano se maneja en "Talle Único" orgánico.</strong>
+            Fiel a su estética y caída natural europea, nuestra <strong>Colección de Lino Italiano se maneja en &quot;Talle Único&quot; orgánico.</strong>
           </p>
           <p>
             Esto significa que las prendas tienen un corte diseñado específicamente de forma holgada.

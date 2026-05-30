@@ -22,12 +22,16 @@ export default function CartDrawer() {
   // Handle open/close state with animation timing
   useEffect(() => {
     if (isOpen) {
-      setShouldRender(true);
-      setIsClosing(false);
+      setTimeout(() => {
+        setShouldRender(true);
+        setIsClosing(false);
+      }, 0);
       document.body.style.overflow = 'hidden';
     } else {
       if (shouldRender) {
-        setIsClosing(true);
+        setTimeout(() => {
+          setIsClosing(true);
+        }, 0);
         const timer = setTimeout(() => {
           setShouldRender(false);
           setIsClosing(false);

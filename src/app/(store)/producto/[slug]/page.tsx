@@ -17,12 +17,6 @@ function resolveThumbUrl(img: string) {
   return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_400,h_530,q_75/${img}`;
 }
 
-const defaultSizes = ['XS', 'S', 'M', 'L', 'XL'];
-const defaultColors = [
-  { name: 'Natural', hex: '#D4C5A9' },
-  { name: 'Terracotta', hex: '#C27852' },
-  { name: 'Oliva', hex: '#7A8450' },
-];
 
 // Dynamic SEO metadata for each product
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -65,6 +59,15 @@ export default async function ProductoPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
+  // Fetch sibling products sharing the same parent design ID
+  const parentId = product.parent_id || product.id;
+  const { data: siblings } = await supabase
+    .from('products')
+    .select('id, name, slug, colors, images, sizes, price, description, category')
+    .or(`parent_id.eq.${parentId},id.eq.${parentId}`)
+    .eq('status', 'active');
+  const productSiblings = siblings || [];
+
   // Fetch related products (same category, exclude current)
   const { data: related } = await supabase
     .from('products')
@@ -75,87 +78,14 @@ export default async function ProductoPage({ params }: { params: Promise<{ slug:
 
   const relatedProducts = related || [];
 
-  // Resolve images
-  const productImages = product.images && product.images.length > 0
-    ? product.images.map((img: string) => resolveImageUrl(img))
-    : ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=1200&fit=crop&q=80'];
-
-  // Normalization logic for sizes and colors (handles both simple arrays and Bulk Upload complex objects)
-  let sizes = defaultSizes;
-  let colors = defaultColors;
-
-  if (Array.isArray(product.sizes) && product.sizes.length > 0) {
-    const firstItem = product.sizes[0];
-    // Check if it's the complex ColorVariation format: { hex, name, sizes: [...] }
-    if (typeof firstItem === 'object' && firstItem !== null && 'sizes' in firstItem && Array.isArray(firstItem.sizes)) {
-      // 1. Extract unique size names from all color variations
-      const allSizeNames = new Set<string>();
-      product.sizes.forEach((variation: any) => {
-        if (Array.isArray(variation.sizes)) {
-          variation.sizes.forEach((s: any) => {
-            if (s.name) allSizeNames.add(s.name);
-          });
-        }
-      });
-      const uniqueSizes = Array.from(allSizeNames);
-      if (uniqueSizes.length > 0) sizes = uniqueSizes;
-
-      // 2. Extract colors from the variations
-      colors = product.sizes.map((v: any) => ({
-        name: v.name || 'Color',
-        hex: v.hex || '#cccccc'
-      }));
-    } else {
-      // Legacy or simple format: sizes could be string[] or [{name, stock}][]
-      sizes = product.sizes.map((s: any) => {
-        if (typeof s === 'object' && s !== null && 'name' in s) return s.name;
-        return typeof s === 'string' ? s : null;
-      }).filter(Boolean);
-
-      if (sizes.length === 0) sizes = defaultSizes;
-
-      if (product.colors && product.colors.length > 0) {
-        colors = product.colors;
-      }
-    }
-  } else if (product.colors && product.colors.length > 0) {
-    // If only colors are defined but no sizes (unlikely but possible)
-    colors = product.colors;
-  }
-
   return (
     <div className={styles.page}>
       <div className={styles.layout}>
         {/* Interactive gallery + options (Client Component) */}
         <ProductOptions
-          product={{
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            slug: product.slug,
-          }}
-          images={productImages}
-          sizes={sizes}
-          colors={colors}
+          initialProduct={product}
+          siblings={productSiblings}
         >
-          {/* Product info container (Title, Price, description) passed natively to sit above options */}
-          <div className={styles.headerRow}>
-            <div>
-              <h1 className={styles.productName}>{product.name}</h1>
-              <span className={styles.brand}>{product.category || 'Glak Originals'}</span>
-            </div>
-            <span className={`${styles.price} font-editorial`}>
-              ${product.price?.toLocaleString('es-AR')}
-            </span>
-          </div>
-
-          {/* Description */}
-          {product.description && (
-            <div className={styles.description}>
-              <p>{product.description}</p>
-            </div>
-          )}
-
           {/* Lookbook Contextual Shopping */}
           {relatedProducts.length > 0 && (
             <section className={styles.lookbookSection}>

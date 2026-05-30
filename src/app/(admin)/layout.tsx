@@ -17,15 +17,6 @@ export default function AdminLayout({
     <div className={styles.adminLayout}>
       <AdminSidebar />
       <div className={styles.mainArea}>
-        {/* Admin Header */}
-        <header className={styles.header}>
-          <div className={styles.headerInner}>
-            <h2 className={styles.pageTitle}>Panel de Administración</h2>
-            <div className={styles.headerActions}>
-              <span className={styles.userName}>Admin</span>
-            </div>
-          </div>
-        </header>
         {/* Content */}
         <main className={styles.content}>{children}</main>
       </div>

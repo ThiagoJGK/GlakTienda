@@ -1,6 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+/**
+ * Creates a Supabase server client for use in Server Components and Route Handlers.
+ * Uses cookie-based auth for SSR.
+ * 
+ * NOTE: If you see "TypeError: fetch failed" or "getaddrinfo ENOTFOUND", 
+ * your Supabase project may be paused (free tier pauses after 7 days of inactivity).
+ * Go to https://supabase.com/dashboard → select your project → click "Restore project".
+ */
 export async function createClient() {
   const cookieStore = await cookies();
 
@@ -18,9 +26,18 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing user sessions.
+            // Called from a Server Component — safe to ignore.
           }
+        },
+      },
+      global: {
+        fetch: (url, options) => {
+          // Abort slow/unreachable requests after 8 seconds
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 8000);
+          return fetch(url, { ...options, signal: controller.signal }).finally(
+            () => clearTimeout(timeout)
+          );
         },
       },
     }

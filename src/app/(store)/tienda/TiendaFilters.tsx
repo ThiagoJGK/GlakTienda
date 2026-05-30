@@ -10,12 +10,10 @@ interface TiendaFiltersProps {
   activeCategory: string;
   activeCollection: string;
   searchQuery?: string;
-  currentSort: string;
-  productCount: number;
   collections: {id: string, name: string, slug: string}[];
 }
 
-export default function TiendaFilters({ activeCategory, activeCollection, searchQuery = '', currentSort, productCount, collections }: TiendaFiltersProps) {
+export default function TiendaFilters({ activeCategory, activeCollection, searchQuery = '', collections }: TiendaFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchValue, setSearchValue] = useState(searchQuery);

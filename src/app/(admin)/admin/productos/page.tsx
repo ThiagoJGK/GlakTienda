@@ -6,9 +6,7 @@ export default async function AdminProductsPage() {
   const supabase = await createClient();
   const { data: products, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
 
-  if (error) {
-    console.error("Error fetching admin products", error);
-  }
+  const productList = products || [];
 
   return (
     <div className={styles.container}>
@@ -27,11 +25,42 @@ export default async function AdminProductsPage() {
         </div>
       </header>
 
-      {(!products || products.length === 0) ? (
+      {/* Error state */}
+      {error && (
+        <div className={styles.emptyState} style={{ borderColor: '#fca5a5', backgroundColor: '#fef2f2', gap: '8px' }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '4px', flexShrink: 0 }}>
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <p className={styles.emptyText} style={{ color: '#991b1b', margin: 0 }}>Sin conexión a Supabase</p>
+          <p style={{ fontSize: '0.875rem', color: '#b91c1c', margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
+            {error.message.includes('fetch') || error.message.includes('network') || error.message.includes('ENOTFOUND')
+              ? 'El proyecto Supabase no responde. Posiblemente está pausado (plan gratuito se pausa tras 7 días de inactividad).'
+              : `Error de base de datos: ${error.message}`
+            }
+          </p>
+          <a
+            href="https://supabase.com/dashboard"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary"
+            style={{ marginTop: '8px', fontSize: '0.875rem', textDecoration: 'none' }}
+          >
+            Ir al Dashboard de Supabase →
+          </a>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!error && productList.length === 0 && (
         <div className={styles.emptyState}>
            <p className={styles.emptyText}>No hay productos publicados todavía.</p>
         </div>
-      ) : (
+      )}
+
+      {/* Products table */}
+      {!error && productList.length > 0 && (
         <div className={styles.tableCard}>
           <table className={styles.table}>
             <thead>
@@ -44,7 +73,7 @@ export default async function AdminProductsPage() {
               </tr>
             </thead>
             <tbody>
-              {products.map((prop) => (
+              {productList.map((prop) => (
                 <tr key={prop.id}>
                   <td>
                     <div className={styles.productCell}>

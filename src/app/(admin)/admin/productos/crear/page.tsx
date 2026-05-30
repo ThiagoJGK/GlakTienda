@@ -117,7 +117,7 @@ export default function CreateProductPage() {
         setErrorObj(result.error || "Falló la creación del producto.");
         setIsSubmitting(false);
       }
-    } catch (err) {
+    } catch {
       setErrorObj("Ocurrió un error inesperado de conexión.");
       setIsSubmitting(false);
     }

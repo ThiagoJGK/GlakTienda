@@ -248,3 +248,130 @@ export async function createColorAction(name: string, hex: string) {
   }
   return { success: true, data };
 }
+
+export interface DraftProductInput {
+  id: string;
+  name?: string;
+  description?: string | null;
+  price?: string | number;
+  variations?: {
+    colorId?: string;
+    name: string;
+    hex: string;
+    sizes: { name: string; stock: number }[];
+  }[];
+  category?: string;
+  tags?: string;
+  imageUrls?: string[];
+  parentId?: string;
+  collections?: { id: string; name: string }[];
+}
+
+export async function upsertProductDraftAction(p: DraftProductInput) {
+  const supabase = await createClient();
+
+  const id = p.id;
+  const name = p.name || `Borrador ${id.slice(0, 8)}`;
+  const description = p.description || null;
+  const price = typeof p.price === 'number' ? p.price : parseFloat(p.price || '0') || 0;
+  const stock = p.variations ? p.variations.reduce((acc: number, v) => 
+    acc + v.sizes.reduce((sum: number, s) => sum + (Number(s.stock) || 0), 0)
+  , 0) : 0;
+  const category = p.category || "General";
+  const tags = p.tags 
+    ? p.tags.split(',').map((t: string) => t.trim()).filter(Boolean)
+    : [];
+  const status = 'draft';
+  
+  // Extract Cloudinary public IDs from URL
+  const images = p.imageUrls ? p.imageUrls.map((url: string) => {
+    const parts = url.split('/');
+    const last = parts[parts.length - 1];
+    return last.split('.')[0]; 
+  }) : [];
+
+  const collections = p.collections || [];
+  const parent_id = p.parentId || null;
+
+  // Generate slug
+  const baseSlug = name
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+  const slug = baseSlug || `draft-${id}`;
+
+  // Upsert the product draft
+  const { data, error } = await supabase
+    .from('products')
+    .upsert({
+      id,
+      name,
+      slug,
+      description,
+      price,
+      stock,
+      sizes: p.variations || [],
+      category,
+      tags,
+      status,
+      images,
+      parent_id,
+    }, {
+      onConflict: 'id'
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error upserting draft:", error);
+    return { success: false, error: error.message };
+  }
+
+  // Handle Collections Pivot for this product draft
+  await supabase.from('product_collections').delete().eq('product_id', id);
+
+  if (collections.length > 0) {
+    for (const coll of collections) {
+      let collection_id = coll.id;
+      if (coll.id.startsWith("new_") || coll.id === "new") {
+        const collSlug = coll.name
+          .toLowerCase()
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)+/g, '');
+
+        const { data: newColl } = await supabase
+          .from('collections')
+          .insert([{ name: coll.name, slug: collSlug }])
+          .select('id')
+          .single();
+
+        if (newColl) {
+          collection_id = newColl.id;
+        }
+      }
+
+      await supabase
+        .from('product_collections')
+        .insert([{ product_id: id, collection_id }]);
+    }
+  }
+
+  return { success: true, data };
+}
+
+export async function deleteProductDraftAction(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error("Error deleting draft:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true };
+}
+

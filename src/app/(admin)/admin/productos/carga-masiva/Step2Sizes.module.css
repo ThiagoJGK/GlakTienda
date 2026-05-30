@@ -1,0 +1,316 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.colorsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.colorSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.colorChipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.colorChip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 9999px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.colorChip:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.colorChipActive {
+  border-color: var(--color-primary);
+  background-color: rgba(var(--color-primary-rgb), 0.08);
+  box-shadow: 0 0 0 1px var(--color-primary), 0 4px 12px rgba(var(--color-primary-rgb), 0.12);
+}
+
+.colorIndicator {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: var(--chip-color);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.colorChipAdd {
+  background-color: transparent;
+  border-style: dashed;
+  color: var(--color-text-muted);
+}
+
+.colorChipAdd:hover {
+  color: var(--color-primary);
+}
+
+.newColorForm {
+  background-color: var(--color-surface);
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.newColorInputs {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.colorPickerRaw {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: transparent;
+  transition: transform 0.2s ease;
+}
+
+.colorPickerRaw:hover {
+  transform: scale(1.05);
+}
+
+.colorPickerRaw::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.colorPickerRaw::-webkit-color-swatch {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.newColorActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.variationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.variationCard {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.variationCard:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.variationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.variationTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.colorIndicatorLarge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.15);
+}
+
+.btnRemove {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.btnRemove:hover {
+  color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.matrixGridContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .matrixGridContainer {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+}
+
+.sizeMatrixChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  box-shadow: 0 1px 2px rgba(86, 130, 3, 0.02);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+}
+
+.sizeMatrixChip:hover {
+  border-color: rgba(86, 130, 3, 0.3);
+  transform: translateY(-1px);
+}
+
+.sizeMatrixChipActive {
+  background-color: var(--accent-light);
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 12px rgba(86, 130, 3, 0.06);
+}
+
+.sizeLabelText {
+  font-family: var(--font-outfit);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #888888;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  letter-spacing: 0.05em;
+  transition: color 0.2s ease;
+}
+
+.sizeLabelTextActive {
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.stockInputMinimal {
+  width: 100%;
+  max-width: 48px;
+  height: 24px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  color: #333333;
+  font-family: var(--font-outfit);
+  font-size: 0.95rem;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.stockInputMinimalActive {
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.stockInputMinimal::-webkit-outer-spin-button,
+.stockInputMinimal::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stockInputMinimal[type=number] {
+  -moz-appearance: textfield;
+}
+
+.totalColorStock {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+  margin-top: 0.25rem;
+  border-top: 1px dashed var(--color-border);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.totalColorStockActive {
+  color: var(--color-primary);
+}
+
+.helperText {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 1.5rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.totalBadge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.03em;
+}

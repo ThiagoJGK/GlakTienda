@@ -22,7 +22,7 @@ export const metadata = {
 };
 
 interface TiendaPageProps {
-  searchParams: Promise<{ cat?: string; q?: string; sort?: string }>;
+  searchParams: Promise<{ cat?: string; q?: string; sort?: string; collection?: string }>;
 }
 
 export default async function TiendaPage({ searchParams }: TiendaPageProps) {
@@ -112,8 +112,6 @@ export default async function TiendaPage({ searchParams }: TiendaPageProps) {
               activeCategory={activeCategory}
               activeCollection={activeCollection}
               searchQuery={searchQuery}
-              currentSort={sortBy}
-              productCount={productList.length}
               collections={collectionList}
             />
           </Suspense>
