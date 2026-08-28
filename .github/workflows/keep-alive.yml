@@ -9,9 +9,16 @@ on:
 jobs:
   ping_db:
     runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL || secrets.SUPABASE_URL || vars.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY || secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}
     steps:
       - name: Ping Supabase REST API
         run: |
-          curl -i -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/products?select=id&limit=1" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          if [[ -z "${SUPABASE_URL}" || -z "${SUPABASE_ANON_KEY}" ]]; then
+            echo "Missing Supabase credentials. Configure NEXT_PUBLIC_SUPABASE_URL/NEXT_PUBLIC_SUPABASE_ANON_KEY (or SUPABASE_URL/SUPABASE_ANON_KEY) as repo secrets or vars."
+            exit 1
+          fi
+
+          curl --fail-with-body -i -X GET "${SUPABASE_URL}/rest/v1/products?select=id&limit=1" \
+          -H "apikey: ${SUPABASE_ANON_KEY}"
