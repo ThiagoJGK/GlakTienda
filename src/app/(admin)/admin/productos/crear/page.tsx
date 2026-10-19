@@ -183,6 +183,7 @@ export default function CreateProductPage() {
             <ColorSizesSection 
               variations={variations}
               onChange={setVariations}
+              categoryName={category}
             />
           </section>
 

@@ -4,7 +4,19 @@ import React, { useState, useEffect } from 'react';
 import styles from './ColorSizesSection.module.css';
 import { getColorsAction, createColorAction } from '@/app/(admin)/admin/productos/actions';
 
-export type SizeStock = { name: string; stock: number };
+import { GLAK_STANDARD_SIZES, EnrichedSizeStock } from '@/types/sizing';
+import SupplierSizeTranslatorModal from './SupplierSizeTranslatorModal';
+
+export type SizeStock = {
+  name: string;
+  stock: number;
+  supplierSizeLabel?: string;
+  supplierName?: string;
+  numericSize?: string;
+  measurementsFlatCm?: any;
+  bodyContourRangeCm?: any;
+};
+
 export type ColorVariation = {
   colorId: string;
   name: string;
@@ -14,14 +26,15 @@ export type ColorVariation = {
 
 export type GlobalColor = { id: string; name: string; hex: string };
 
-const STANDARD_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'U'];
+const STANDARD_SIZES = GLAK_STANDARD_SIZES;
 
 interface Props {
   variations: ColorVariation[];
   onChange: (variations: ColorVariation[]) => void;
+  categoryName?: string;
 }
 
-export default function ColorSizesSection({ variations, onChange }: Props) {
+export default function ColorSizesSection({ variations, onChange, categoryName }: Props) {
   const [globalColors, setGlobalColors] = useState<GlobalColor[]>([]);
   const [isLoadingColors, setIsLoadingColors] = useState(true);
   
@@ -29,6 +42,21 @@ export default function ColorSizesSection({ variations, onChange }: Props) {
   const [newColorName, setNewColorName] = useState('');
   const [newColorHex, setNewColorHex] = useState('#000000');
   const [isSavingColor, setIsSavingColor] = useState(false);
+  const [isTranslatorOpen, setIsTranslatorOpen] = useState(false);
+  const [targetColorId, setTargetColorId] = useState<string | null>(null);
+
+  const openTranslatorModal = (colorId?: string) => {
+    setTargetColorId(colorId || null);
+    setIsTranslatorOpen(true);
+  };
+
+  const handleApplyTranslatedSizes = (enrichedSizes: EnrichedSizeStock[]) => {
+    if (targetColorId) {
+      onChange(variations.map(v => v.colorId === targetColorId ? { ...v, sizes: enrichedSizes } : v));
+    } else if (variations.length > 0) {
+      onChange(variations.map(v => ({ ...v, sizes: enrichedSizes })));
+    }
+  };
 
   async function loadColors() {
     setIsLoadingColors(true);
@@ -96,8 +124,27 @@ export default function ColorSizesSection({ variations, onChange }: Props) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.colorsHeader}>
+      <div className={styles.colorsHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h3 className={styles.sectionTitle}>Variaciones de Color</h3>
+        <button
+          type="button"
+          onClick={() => openTranslatorModal()}
+          style={{
+            backgroundColor: '#f0fdf4',
+            color: '#15803d',
+            border: '1px solid #bbf7d0',
+            padding: '6px 12px',
+            borderRadius: '8px',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+          }}
+        >
+          <span>🪄</span> Traducir Talles de Proveedor
+        </button>
       </div>
 
       <div className={styles.colorSelector}>
@@ -190,7 +237,25 @@ export default function ColorSizesSection({ variations, onChange }: Props) {
                     <span className={styles.colorIndicatorLarge} style={{ backgroundColor: v.hex }}></span>
                     <strong>{v.name}</strong>
                  </div>
-                 <button type="button" onClick={() => removeVariation(v.colorId)} className={styles.btnRemove}>✕ Quitar</button>
+                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                   <button
+                     type="button"
+                     onClick={() => openTranslatorModal(v.colorId)}
+                     style={{
+                       backgroundColor: '#f8fafc',
+                       border: '1px solid #cbd5e1',
+                       borderRadius: '6px',
+                       padding: '3px 8px',
+                       fontSize: '0.75rem',
+                       cursor: 'pointer',
+                       color: '#334155',
+                       fontWeight: 500,
+                     }}
+                   >
+                     🪄 Talles Proveedor
+                   </button>
+                   <button type="button" onClick={() => removeVariation(v.colorId)} className={styles.btnRemove}>✕ Quitar</button>
+                 </div>
               </div>
 
               <div className={styles.sizesGridContainer}>
@@ -238,6 +303,13 @@ export default function ColorSizesSection({ variations, onChange }: Props) {
           );
         })}
       </div>
+
+      <SupplierSizeTranslatorModal
+        isOpen={isTranslatorOpen}
+        onClose={() => setIsTranslatorOpen(false)}
+        onApply={handleApplyTranslatedSizes}
+        initialCategory={categoryName}
+      />
     </div>
   );
 }

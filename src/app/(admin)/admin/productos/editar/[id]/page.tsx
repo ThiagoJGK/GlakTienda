@@ -267,6 +267,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             <ColorSizesSection 
               variations={variations}
               onChange={setVariations}
+              categoryName={category}
             />
           </section>
 
