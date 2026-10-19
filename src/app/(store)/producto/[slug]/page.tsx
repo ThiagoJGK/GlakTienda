@@ -1,7 +1,7 @@
 import styles from './page.module.css';
 import ProductCard from '@/components/ui/ProductCard';
 import ProductOptions from '@/components/ui/ProductOptions';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
@@ -17,21 +17,43 @@ function resolveThumbUrl(img: string) {
   return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_400,h_530,q_75/${img}`;
 }
 
+// 1. Edge caching revalidation interval (1 hour)
+export const revalidate = 3600;
+
+// 2. Pre-render the top 20 most popular/recent active products
+export async function generateStaticParams() {
+  const supabase = createPublicClient();
+  const { data: products } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  return products?.map((p) => ({ slug: p.slug })) || [];
+}
 
 // Dynamic SEO metadata for each product
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: product } = await supabase
     .from('products')
-    .select('name, description, category, images')
+    .select('name, description, category, images, standardized_images')
     .eq('slug', slug)
     .single();
 
   if (!product) return { title: 'Producto no encontrado' };
 
-  const image = product.images?.[0]
-    ? resolveImageUrl(product.images[0])
+  const standardizedIds: string[] = (product.standardized_images || [])
+    .map((si: any) => si.cloudinary_id)
+    .filter(Boolean);
+  const displayImages = standardizedIds.length > 0
+    ? [...standardizedIds, ...(product.images || []).filter((img: string) => !standardizedIds.includes(img))]
+    : product.images || [];
+
+  const image = displayImages?.[0]
+    ? resolveImageUrl(displayImages[0])
     : undefined;
 
   return {
@@ -47,7 +69,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: product, error } = await supabase
     .from('products')
@@ -58,6 +80,16 @@ export default async function ProductoPage({ params }: { params: Promise<{ slug:
   if (error || !product) {
     notFound();
   }
+
+  // Build display images: prioritize standardized, fallback to originals
+  const standardizedIds: string[] = (product.standardized_images || [])
+    .map((si: any) => si.cloudinary_id)
+    .filter(Boolean);
+  const displayImages = standardizedIds.length > 0
+    ? [...standardizedIds, ...(product.images || []).filter((img: string) => !standardizedIds.includes(img))]
+    : product.images || [];
+
+  const displayProduct = { ...product, images: displayImages };
 
   // Fetch sibling products sharing the same parent design ID
   const parentId = product.parent_id || product.id;
@@ -83,7 +115,7 @@ export default async function ProductoPage({ params }: { params: Promise<{ slug:
       <div className={styles.layout}>
         {/* Interactive gallery + options (Client Component) */}
         <ProductOptions
-          initialProduct={product}
+          initialProduct={displayProduct}
           siblings={productSiblings}
         >
           {/* Lookbook Contextual Shopping */}

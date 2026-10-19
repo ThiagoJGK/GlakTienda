@@ -1,20 +1,10 @@
 import styles from './page.module.css';
-import ProductCard from '@/components/ui/ProductCard';
 import { createClient } from '@/lib/supabase/server';
-import TiendaFilters from './TiendaFilters';
-import SortSelect from './SortSelect';
+import TiendaCatalog from './TiendaCatalog';
+import { getEmbeddingForText } from '@/lib/gemini/embeddings';
 import { Suspense } from 'react';
-
-const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dpm4judv4";
-
-function getProductImage(product: { images?: string[]; name: string }) {
-  if (product.images && product.images.length > 0) {
-    const img = product.images[0];
-    if (img.startsWith('http')) return img;
-    return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_400,h_530,q_75/${img}`;
-  }
-  return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=530&fit=crop&q=75';
-}
+import FilterSkeleton from './FilterSkeleton';
+import ProductGridSkeleton from '@/components/ui/ProductGridSkeleton';
 
 export const metadata = {
   title: 'Tienda',
@@ -22,7 +12,16 @@ export const metadata = {
 };
 
 interface TiendaPageProps {
-  searchParams: Promise<{ cat?: string; q?: string; sort?: string; collection?: string }>;
+  searchParams: Promise<{
+    cat?: string;
+    q?: string;
+    sort?: string;
+    collection?: string;
+    colors?: string;
+    sizes?: string;
+    minPrice?: string;
+    maxPrice?: string;
+  }>;
 }
 
 export default async function TiendaPage({ searchParams }: TiendaPageProps) {
@@ -32,63 +31,72 @@ export default async function TiendaPage({ searchParams }: TiendaPageProps) {
   const searchQuery = params.q || '';
   const sortBy = params.sort || 'relevantes';
 
+  const colorsParam = params.colors ? params.colors.split(',') : [];
+  const sizesParam = params.sizes ? params.sizes.split(',') : [];
+  const minPriceParam = params.minPrice ? parseInt(params.minPrice) : undefined;
+  const maxPriceParam = params.maxPrice ? parseInt(params.maxPrice) : undefined;
+
   const supabase = await createClient();
 
-  let query = supabase
-    .from('products')
-    .select('*')
-    .eq('status', 'active');
-
-  // Filter by category
-  if (activeCategory && activeCategory !== 'Todo') {
-    query = query.ilike('category', activeCategory);
-  }
-
-  // Fetch all collections for the sidebar
-  const { data: collections } = await supabase.from('collections').select('id, name, slug').order('name');
+  // 1. Fetch collections metadata
+  const { data: collections } = await supabase
+    .from('collections')
+    .select('id, name, slug')
+    .order('name');
   const collectionList = collections || [];
 
-  // If a collection is selected, fetch product IDs from the junction table
-  if (activeCollection) {
-    const selectedColl = collectionList.find(c => c.slug === activeCollection);
-    if (selectedColl) {
-      const { data: pivotData } = await supabase
-        .from('product_collections')
-        .select('product_id')
-        .eq('collection_id', selectedColl.id);
-      
-      const productIds = pivotData?.map(row => row.product_id) || [];
-      
-      if (productIds.length > 0) {
-        query = query.in('id', productIds);
-      } else {
-        // Force an empty result if the collection has no products
-        query = query.in('id', ['00000000-0000-0000-0000-000000000000']);
+  // 2. Fetch the collections junction pivot table to enable client-side collection filtering
+  const { data: pivotData } = await supabase
+    .from('product_collections')
+    .select('product_id, collection_id');
+  const pivotList = pivotData || [];
+
+  // 3. Search query pgvector vs text fallback check
+  let productsList: any[] = [];
+  let usedVectorSearch = false;
+
+  if (searchQuery) {
+    try {
+      const embedding = await getEmbeddingForText(searchQuery);
+      if (embedding) {
+        // Query the pgvector match_products RPC
+        const { data: rpcData, error: rpcError } = await supabase.rpc('match_products', {
+          query_embedding: embedding,
+          match_threshold: 0.25, // organic threshold
+          match_count: 80
+        });
+
+        if (rpcError) {
+          console.warn("pgvector match_products RPC failed, falling back to text search...", rpcError);
+        } else if (rpcData) {
+          // Keep only active products
+          productsList = rpcData.filter((p: any) => p.status === 'active');
+          usedVectorSearch = true;
+        }
       }
+    } catch (err) {
+      console.warn("Vector embedding generation or RPC call failed, falling back to text search...", err);
     }
   }
 
-  // Search by name
-  if (searchQuery) {
-    query = query.ilike('name', `%${searchQuery}%`);
+  // Graceful fallback to text search if pgvector was not used or failed
+  if (!usedVectorSearch) {
+    let query = supabase
+      .from('products')
+      .select('*')
+      .eq('status', 'active');
+
+    // Text search by name ilike
+    if (searchQuery) {
+      query = query.ilike('name', `%${searchQuery}%`);
+    }
+
+    const { data: textData, error: textError } = await query;
+    if (textError) {
+      console.error("Error fetching text-based search fallback products:", textError);
+    }
+    productsList = textData || [];
   }
-
-  // Sort
-  if (sortBy === 'menor-precio') {
-    query = query.order('price', { ascending: true });
-  } else if (sortBy === 'mayor-precio') {
-    query = query.order('price', { ascending: false });
-  } else {
-    query = query.order('created_at', { ascending: false });
-  }
-
-  const { data: products, error } = await query;
-
-  if (error) {
-    console.error("Error fetching products:", error);
-  }
-
-  const productList = products || [];
 
   return (
     <div className={styles.page}>
@@ -100,60 +108,40 @@ export default async function TiendaPage({ searchParams }: TiendaPageProps) {
           </h1>
           <p className={styles.subtitle}>
             {searchQuery
-              ? `${productList.length} producto${productList.length !== 1 ? 's' : ''} encontrado${productList.length !== 1 ? 's' : ''}`
+              ? `Encontramos ${productsList.length} producto${productsList.length !== 1 ? 's' : ''} para tu búsqueda`
               : 'Descubrí toda la colección Glak'}
           </p>
         </div>
 
-        <div className={styles.layout}>
-          {/* Sidebar Filters */}
-          <Suspense fallback={<aside className={styles.sidebar} style={{opacity: 0.5}}>Cargando filtros...</aside>}>
-            <TiendaFilters
-              activeCategory={activeCategory}
-              activeCollection={activeCollection}
-              searchQuery={searchQuery}
-              collections={collectionList}
-            />
-          </Suspense>
-
-          {/* Main Content Area */}
-          <div className={styles.mainContent}>
-            {/* Sort Bar */}
-            <div className={styles.sortBar}>
-              <span className={styles.count}>{productList.length} productos</span>
-              <div className={styles.sortActions}>
-                <form action="/tienda" method="get">
-                  <input type="hidden" name="cat" value={activeCategory !== 'Todo' ? activeCategory : ''} />
-                  <input type="hidden" name="collection" value={activeCollection} />
-                  <input type="hidden" name="q" value={searchQuery} />
-                  <SortSelect defaultValue={sortBy} />
-                </form>
-              </div>
+        {/* Dynamic interactive catalog client side wrapper */}
+        <Suspense fallback={
+          <div className={styles.layout}>
+            <aside className={styles.sidebar}>
+              <FilterSkeleton />
+            </aside>
+            <div className={styles.mainContent}>
+              <ProductGridSkeleton />
             </div>
-
-            {/* Product grid */}
-            {productList.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p>{searchQuery ? 'No encontramos productos con esa búsqueda.' : 'No hay productos disponibles todavía.'}</p>
-                <span>{searchQuery ? 'Probá con otro término o explorá las categorías.' : 'Los productos publicados desde el panel de admin aparecerán aquí.'}</span>
-              </div>
-            ) : (
-              <div className={styles.productGrid}>
-                {productList.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    name={product.name}
-                    price={product.price}
-                    image={getProductImage(product)}
-                    href={`/producto/${product.slug}`}
-                    category={product.category?.toUpperCase()}
-                  />
-                ))}
-              </div>
-            )}
           </div>
-        </div>
+        }>
+          <TiendaCatalog
+            initialProducts={productsList}
+            collections={collectionList}
+            pivotList={pivotList}
+            initialFilters={{
+              q: searchQuery,
+              cat: activeCategory,
+              collection: activeCollection,
+              sort: sortBy,
+              colors: colorsParam,
+              sizes: sizesParam,
+              minPrice: minPriceParam,
+              maxPrice: maxPriceParam
+            }}
+          />
+        </Suspense>
       </div>
     </div>
   );
 }
+

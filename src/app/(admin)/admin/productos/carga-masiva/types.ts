@@ -13,7 +13,14 @@ export type UploadingProduct = {
   name: string;
   description: string;
   category: string;
-  tags: string;
+  fashionMetadata: {
+    material: string;
+    fit: string;
+    style: string;
+    neckline_sleeve: string;
+    details: string;
+    careInstructions: string;
+  };
 
   // Manual Fields — price set in Step 1
   price: string;
@@ -35,4 +42,8 @@ export type UploadingProduct = {
   uploadStatus: 'idle' | 'uploading' | 'done' | 'error';
 
   parentId?: string;
+
+  // Smart Crop Preferences
+  cropStyle?: 'original' | '3:4' | '1:1';
+  cropBackground?: 'brand' | 'white';
 };

@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLak Tienda — Mapa de Ruta Visual y Funcional</title>
+  
+  <!-- Google Fonts: Outfit (estructural) y Playfair Display (editorial) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM TOKENS & RESET (Boutique Avocado & Ivory Palette)
+       ========================================================================== */
+    :root {
+      --bg-primary: #FDFBF5;       /* Warm Ivory base */
+      --bg-secondary: #FFF8B9;     /* Soft Lemon Chiffon tint */
+      --bg-surface: #FFFFFF;       /* Pure White */
+      --bg-card: rgba(255, 255, 255, 0.75);
+      
+      --accent-primary: #568203;   /* Deep Avocado Green */
+      --accent-hover: #456A02;
+      --accent-pressed: #375501;
+      --accent-light: rgba(86, 130, 3, 0.06);
+      
+      --text-main: #1C2E01;        /* Dark Forest Green (high contrast body) */
+      --text-muted: #556B2F;       /* Olive Green */
+      --text-light: #8E9C74;
+      
+      --border-subtle: rgba(86, 130, 3, 0.12);
+      --border-focus: rgba(86, 130, 3, 0.4);
+      
+      --shadow-soft: 0 10px 30px -10px rgba(86, 130, 3, 0.05);
+      --shadow-premium: 0 20px 40px -15px rgba(86, 130, 3, 0.08);
+      
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 32px;
+      
+      --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, h5 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .font-editorial {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-light);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-primary);
+    }
+
+    /* ==========================================================================
+       CONTAINERS & LAYOUT
+       ========================================================================== */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ==========================================================================
+       HERO SECTION
+       ========================================================================== */
+    .hero {
+      padding: 100px 0 60px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: -10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255, 248, 185, 0.4) 0%, rgba(253, 251, 245, 0) 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .brand-badge {
+      display: inline-block;
+      padding: 8px 18px;
+      background: var(--accent-light);
+      border: 1px solid var(--border-subtle);
+      border-radius: 100px;
+      color: var(--accent-primary);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 4vw, 4.5rem);
+      color: var(--text-main);
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 1.2vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 40px;
+      font-weight: 300;
+    }
+
+    /* ==========================================================================
+       INTERACTIVE LIVE DEMO: WHAT IS A LOOKBOOK HOTSPOT?
+       ========================================================================== */
+    .concept-showcase {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-premium);
+      margin-bottom: 80px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .concept-showcase {
+        grid-template-columns: 1fr;
+        padding: 24px;
+      }
+    }
+
+    .lookbook-canvas {
+      position: relative;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border-subtle);
+      aspect-ratio: 4/5;
+      background: #EAE5D9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Dummy Editorial Model Artwork */
+    .dummy-fashion-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.95;
+    }
+
+    /* Hotspot Interactive Element */
+    .hotspot {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .hotspot-dot {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-surface);
+      border: 2px solid var(--accent-primary);
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+    }
+
+    .hotspot-dot::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+    }
+
+    /* Pulse animation */
+    .hotspot-pulse {
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border: 1.5px solid var(--accent-primary);
+      border-radius: 50%;
+      opacity: 0;
+      animation: pulse 2s cubic-bezier(0.25, 0, 0, 1) infinite;
+      pointer-events: none;
+    }
+
+    .hotspot:hover .hotspot-dot {
+      transform: scale(1.2);
+      box-shadow: 0 0 15px rgba(86, 130, 3, 0.4);
+    }
+
+    /* Custom Positioned Hotspots for Demo */
+    .hs-yellow-dress {
+      top: 35%;
+      left: 55%;
+    }
+
+    .hs-straw-bag {
+      top: 65%;
+      left: 70%;
+    }
+
+    /* Floating Popover UI Card */
+    .hotspot-card {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      width: 240px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      box-shadow: var(--shadow-premium);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-smooth);
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    /* Arrow */
+    .hotspot-card::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(255, 255, 255, 0.92) transparent transparent transparent;
+    }
+
+    .hotspot:hover .hotspot-card {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .hs-card-img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: #EAE6D6;
+    }
+
+    .hs-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .hs-card-price {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent-primary);
+    }
+
+    /* Explainer side of the showcase */
+    .concept-explainer-text h3 {
+      font-size: 28px;
+      margin-bottom: 16px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .concept-explainer-text p {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .concept-benefits {
+      list-style: none;
+    }
+
+    .concept-benefits li {
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+    }
+
+    .concept-benefits li::before {
+      content: "✔";
+      color: var(--accent-primary);
+      background: var(--accent-light);
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       THE 5 MAIN ROADMAP DEPARTMENTS
+       ========================================================================== */
+    .roadmap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 30px;
+      margin-bottom: 80px;
+    }
+
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      transition: var(--transition-smooth);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--accent-primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: var(--transition-smooth);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-premium);
+      border-color: rgba(86, 130, 3, 0.25);
+    }
+
+    .feature-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card-num {
+      position: absolute;
+      top: 24px;
+      right: 28px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent-light);
+      line-height: 1;
+    }
+
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 20px;
+      background: var(--accent-light);
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-title {
+      font-size: 20px;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      padding-right: 40px;
+    }
+
+    .card-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      flex-grow: 1;
+    }
+
+    .card-features-list {
+      list-style: none;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 20px;
+    }
+
+    .card-features-list li {
+      font-size: 13.5px;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .card-features-list li::before {
+      content: "✦";
+      position: absolute;
+      left: 0;
+      color: var(--accent-primary);
+      font-size: 14px;
+    }
+
+    .card-features-list li strong {
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       BEFORE vs AFTER ERGONOMIC SLIDER / GRID
+       ========================================================================== */
+    .comparison-section {
+      margin-bottom: 80px;
+    }
+
+    .comparison-title {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 16px;
+      color: var(--text-main);
+    }
+
+    .comparison-subtitle {
+      text-align: center;
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 50px;
+      font-weight: 300;
+    }
+
+    .comp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 800px) {
+      .comp-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comp-pane {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 30px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .pane-title {
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid;
+    }
+
+    .comp-pane.before .pane-title {
+      color: #9E2A2B;
+      border-color: rgba(158, 42, 43, 0.15);
+    }
+
+    .comp-pane.after .pane-title {
+      color: var(--accent-primary);
+      border-color: rgba(86, 130, 3, 0.15);
+    }
+
+    .comp-list {
+      list-style: none;
+    }
+
+    .comp-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      align-items: flex-start;
+    }
+
+    .comp-item-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: white;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .before .comp-item-badge {
+      background: #9E2A2B;
+    }
+
+    .after .comp-item-badge {
+      background: var(--accent-primary);
+    }
+
+    .comp-item-text h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .comp-item-text p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       USER FEEDBACK & INTEGRATED ANSWERS PANEL
+       ========================================================================== */
+    .feedback-highlight {
+      background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-secondary) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-premium);
+      margin-bottom: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feedback-highlight::after {
+      content: "❤";
+      position: absolute;
+      bottom: -30px;
+      right: 10px;
+      font-size: 180px;
+      color: rgba(86, 130, 3, 0.03);
+      font-family: serif;
+      pointer-events: none;
+    }
+
+    .feedback-title {
+      font-size: 24px;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .feedback-text {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      max-width: 800px;
+    }
+
+    .adjustments-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .adj-card {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+    }
+
+    .adj-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .adj-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .adj-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       CTA FOOTER
+       ========================================================================== */
+    .footer-cta {
+      text-align: center;
+      padding: 60px 0 100px;
+    }
+
+    .footer-cta h3 {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+
+    .footer-cta p {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 500px;
+      margin: 0 auto 30px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      padding: 16px 36px;
+      background: var(--accent-primary);
+      color: white;
+      text-decoration: none;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      border-radius: 100px;
+      box-shadow: 0 10px 25px -5px rgba(86, 130, 3, 0.3);
+      transition: var(--transition-smooth);
+    }
+
+    .cta-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px -5px rgba(86, 130, 3, 0.4);
+    }
+
+    /* ==========================================================================
+       KEYFRAMES
+       ========================================================================== */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.9);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Main Container -->
+  <div class="container">
+
+    <!-- Header / Hero -->
+    <header class="hero">
+      <div class="brand-badge">Nueva Experiencia GLak</div>
+      <h1 class="hero-title">El Futuro Visual de <br><span class="font-editorial">GLak Tienda</span></h1>
+      <p class="hero-subtitle">Una experiencia interactiva y de alta gama pensada para tus clientes y optimizada para tu gestión diaria como administrador.</p>
+    </header>
+
+    <!-- Concept Showcase: What is a Lookbook Hotspot? -->
+    <section class="concept-showcase">
+      <!-- Lookbook Canvas Widget (Interactive) -->
+      <div class="lookbook-canvas">
+        <!-- Generaremos una ilustración SVG de alta gama que simule una modelo de alta moda con un vestido premium -->
+        <svg viewBox="0 0 400 500" class="dummy-fashion-img" style="background:#F4EFE6;">
+          <!-- Fondo y gradiente estético -->
+          <defs>
+            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#EAE3D2"/>
+              <stop offset="100%" stop-color="#D5CBB4"/>
+            </linearGradient>
+            <linearGradient id="dressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFDD53"/>
+              <stop offset="100%" stop-color="#DDB300"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="500" fill="url(#bgGrad)"/>
+          
+          <!-- Abstract Luxury Silhouette Art (Geometric Minimalist Fashion) -->
+          <circle cx="200" cy="120" r="45" fill="#EADCC9" /> <!-- Head/Hat silhouette -->
+          <path d="M120 180 C120 180, 200 130, 280 180" stroke="#8E9C74" stroke-width="2" fill="none"/> <!-- Editorial curve -->
+          <path d="M140 180 L260 180 L290 420 L110 420 Z" fill="url(#dressGrad)"/> <!-- Yellow Linen Dress silhouette -->
+          <path d="M180 180 L200 240 L220 180 Z" fill="#DDB300" opacity="0.3"/> <!-- Collar details -->
+          <ellipse cx="280" cy="360" rx="20" ry="30" fill="#C49B74" stroke="#8E9C74" stroke-width="1.5"/> <!-- Straw bag silhouette -->
+          <path d="M265 340 Q280 300 295 340" stroke="#8E9C74" stroke-width="2" fill="none"/> <!-- Bag Handle -->
+          
+          <!-- Subtle fashion lines -->
+          <line x1="200" y1="165" x2="200" y2="420" stroke="#FFFFFF" stroke-dasharray="4" opacity="0.4"/>
+        </svg>
+
+        <!-- Hotspot 1: Vestido Lino Amarillo -->
+        <div class="hotspot hs-yellow-dress">
+          <div class="hotspot-pulse"></div>
+          <div class="hotspot-dot"></div>
+          <!-- Popover card -->
+          <div class="hotspot-card">
+            <!-- Simulated image -->
+            <svg class="hs-card-img" viewBox="0 0 200 100">
+              <rect width="200" height="100" fill="#FFEB85"/>
+              <text x="50%" y="55%" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" fill="#6A5300" font-size="12">Previsualización Prenda</text>
+            </svg>
+            <h4 class="hs-card-title">Vestido Lino Amarillo</h4>
+            <div class="hs-card-price">$45.000 ARS</div>
+          </div>
+        </div>
+
+        <!-- Hotspot 2: Bolso de Mimbre -->
+        <div class="hotspot hs-straw-bag">
+          <div class="hotspot-pulse"></div>
+          <div class="hotspot-dot"></div>
+          <!-- Popover card -->
+          <div class="hotspot-card">
+            <svg class="hs-card-img" viewBox="0 0 200 100">
+              <rect width="200" height="100" fill="#E6D3BE"/>
+              <text x="50%" y="55%" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" fill="#5F4B35" font-size="12">Previsualización Accesorio</text>
+            </svg>
+            <h4 class="hs-card-title">Bolso de Mimbre Atelier</h4>
+            <div class="hs-card-price">$28.500 ARS</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Explainer text side -->
+      <div class="concept-explainer-text">
+        <h3>
+          <span>📌</span>
+          ¿Qué es un Hotspot?
+        </h3>
+        <p>Un <strong>Hotspot</strong> es un punto interactivo y flotante colocado estratégicamente sobre las fotografías de tus campañas o lookbooks. Al pasar el cursor o pulsar sobre él, despliega instantáneamente un mini-menú visual con la información del artículo y un enlace directo de compra.</p>
+        <p>Esto permite a tus clientes interactuar con la foto de un outfit completo ("Look completo") y descubrir exactamente qué productos lo componen, reduciendo fricciones y estimulando la venta cruzada espontánea.</p>
+        <ul class="concept-benefits">
+          <li><strong>Interacción Fluida</strong>: El cliente compra directamente lo que ve en escena.</li>
+          <li><strong>Zero Latency</strong>: Despliegue inmediato sin salir de la página principal.</li>
+          <li><strong>Visuales Premium</strong>: Integra micro-animaciones sutiles tipo pulso.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- The Roadmap Feature Blocks -->
+    <h2 class="comparison-title">Mapa de Ruta de Funcionalidades</h2>
+    <p class="comparison-subtitle">Así se estructuran los cambios visuales y ergonómicos en la tienda tras procesar tus comentarios.</p>
+    
+    <div class="roadmap-grid">
+
+      <!-- 1. AI INGESTION (Refactored) -->
+      <div class="feature-card">
+        <span class="card-num">01</span>
+        <div class="card-icon">🤖</div>
+        <h3 class="card-title">Ingesta Inteligente de Catálogo</h3>
+        <p class="card-desc">Rediseñamos el cargador masivo para concentrar la inteligencia artificial de Gemini 3. Ahora el análisis extrae directamente características de diseño avanzado (sleeve, neck, fabric) integrándolas en el flujo original en lugar de generar etiquetas redundantes y repetitivas.</p>
+        <ul class="card-features-list">
+          <li><strong>Extracción Concentrada</strong>: Menos etiquetas sueltas, mejores descripciones estructuradas.</li>
+          <li><strong>Encuadre Centrado</strong>: Ajuste automático de fotos en el catálogo (`c_pad,g_auto`) para una grilla simétrica.</li>
+          <li><strong>Cero Duplicados</strong>: Se reemplaza la generación genérica por atributos de alta costura utilizables como filtros.</li>
+        </ul>
+      </div>
+
+      <!-- 2. SEARCH & FILTERS -->
+      <div class="feature-card">
+        <span class="card-num">02</span>
+        <div class="card-icon">🔍</div>
+        <h3 class="card-title">Búsqueda Semántica de IA</h3>
+        <p class="card-desc">Tu buscador tradicional evoluciona a un asistente semántico inteligente. El cliente puede buscar describiendo situaciones o emociones, y el motor de IA de Supabase conectará los términos de forma humana.</p>
+        <ul class="card-features-list">
+          <li><strong>Lenguaje Natural</strong>: El cliente puede buscar "un vestido elegante para una noche de verano" y obtener coincidencias óptimas.</li>
+          <li><strong>Sidebar Dinámico</strong>: Filtros de talles y colores autogenerados basados exclusivamente en los productos en stock.</li>
+          <li><strong>Navegación Silenciosa</strong>: Los swatches y filtros se aplican al instante actualizando la URL de forma limpia y transparente.</li>
+        </ul>
+      </div>
+
+      <!-- 3. PREMIUM CHECKOUT -->
+      <div class="feature-card">
+        <span class="card-num">03</span>
+        <div class="card-icon">🛒</div>
+        <h3 class="card-title">Checkout Transaccional Seguro</h3>
+        <p class="card-desc">Un checkout premium en 3 pasos con un look ultra limpio que maximiza la tasa de conversión, garantizando la seguridad de tu stock ante compras concurrentes y calculando despachos en tiempo real.</p>
+        <ul class="card-features-list">
+          <li><strong>Bloqueo de Stock temporal</strong>: La prenda elegida se reserva por 15 minutos en el carrito mientras se efectúa el pago.</li>
+          <li><strong>Envíos Dinámicos</strong>: Integración transparente para cotizar tarifas en tiempo real con operadores locales.</li>
+          <li><strong>Mercado Pago Edge</strong>: Flujo rápido y seguro mediante redirección al Checkout Pro oficial, libre de código pesado.</li>
+        </ul>
+      </div>
+
+      <!-- 4. EDGE SPEED & REDUCED CLS -->
+      <div class="feature-card">
+        <span class="card-num">04</span>
+        <div class="card-icon">⚡</div>
+        <h3 class="card-title">Estabilización y Velocidad Extrema</h3>
+        <p class="card-desc">Optimizamos la experiencia en teléfonos móviles de última generación y conexiones lentas (4G). Estabilizamos la interfaz para que el usuario navegue plácidamente sin saltos de pantalla molestos.</p>
+        <ul class="card-features-list">
+          <li><strong>Sin saltos (CLS Cero)</strong>: Uso de subgrillas CSS modernas que impiden que los textos y precios muevan las cartas al cargar.</li>
+          <li><strong>Skeletons Elegantes</strong>: Pantallas de carga en tonos crema/avocado que anticipan la forma del catálogo.</li>
+          <li><strong>Edge Caching Directo</strong>: Las páginas de producto abren en menos de 100ms gracias al cacheo inteligente.</li>
+        </ul>
+      </div>
+
+      <!-- 5. MARKETING & RECUPERACIÓN -->
+      <div class="feature-card">
+        <span class="card-num">05</span>
+        <div class="card-icon">📧</div>
+        <h3 class="card-title">Conversión de Clientes y Lookbooks</h3>
+        <p class="card-desc">Estrategias de mercadeo integradas directamente en el backend para incentivar compras espontáneas y recuperar carritos que quedaron a mitad de camino.</p>
+        <ul class="card-features-list">
+          <li><strong>Lookbooks con Hotspots</strong>: Tus fotos de campaña cobran vida con puntos interactivos como el ilustrado arriba.</li>
+          <li><strong>Recuperador de Carrito</strong>: Si el cliente ingresa su mail en el checkout y abandona la pestaña, se despacha un recordatorio automatizado.</li>
+          <li><strong>Despacho Vía Resend</strong>: Mails limpios con plantillas premium que abren con un clic su carrito tal como lo dejaron. ¡Gratis y factible!</li>
+        </ul>
+      </div>
+
+      <!-- 6. SECURITY & ADMIN (Zero-Trust) -->
+      <div class="feature-card">
+        <span class="card-num">06</span>
+        <div class="card-icon">🔒</div>
+        <h3 class="card-title">Seguridad Blindada Administrativa</h3>
+        <p class="card-desc">Protegemos la integridad de tu inventario y catálogo. Blindamos las APIs de Supabase y las Server Actions de Next.js para que nadie ajeno a tu negocio pueda alterar precios o borrar prendas.</p>
+        <ul class="card-features-list">
+          <li><strong>Políticas RLS Estrictas</strong>: Bloqueo total de accesos anónimos de escritura a nivel de base de datos.</li>
+          <li><strong>Wrappers de Autenticación</strong>: Las funciones administrativas validan rigurosamente la sesión de administrador en el servidor.</li>
+          <li><strong>Middleware de Enrutamiento</strong>: Rutas de administración inaccesibles e invisibles para visitantes comunes.</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Before and After Comparison Grid -->
+    <section class="comparison-section">
+      <h2 class="comparison-title">¿Qué cambia en la práctica?</h2>
+      <p class="comparison-subtitle">Comparativa ergonómica y funcional directa entre el sistema actual y la nueva implementación planeada.</p>
+      
+      <div class="comp-grid">
+        
+        <!-- BEFORE -->
+        <div class="comp-pane before">
+          <h3 class="pane-title">Antes (E-Commerce Básico)</h3>
+          <ul class="comp-list">
+            <li class="comp-item">
+              <span class="comp-item-badge">✕</span>
+              <div class="comp-item-text">
+                <h4>Grillas Inestables al Cargar</h4>
+                <p>Las tarjetas de productos en el feed móvil cambian de altura al cargarse los nombres y descripciones largas, moviendo la pantalla bruscamente.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="comp-item-badge">✕</span>
+              <div class="comp-item-text">
+                <h4>Filtros Estáticos en Código</h4>
+                <p>Las categorías están escritas de forma fija en la tienda. Si el administrador añade una categoría de producto en la base de datos, no aparece en los filtros.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="comp-item-badge">✕</span>
+              <div class="comp-item-text">
+                <h4>Checkout Incompleto (Placeholder)</h4>
+                <p>La pantalla de checkout actual es un formulario visual de simulación sin conexión real de pago ni cotizaciones logísticas argentinas.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="comp-item-badge">✕</span>
+              <div class="comp-item-text">
+                <h4>Base de Datos Abierta en Desarrollo</h4>
+                <p>Las políticas de base de datos permiten de forma anónima borrar o editar elementos, exponiendo el negocio ante cualquier usuario malintencionado.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- AFTER -->
+        <div class="comp-pane after">
+          <h3 class="pane-title">Después (Experiencia GLak Alta Gama)</h3>
+          <ul class="comp-list">
+            <li class="comp-item">
+              <span class="comp-item-badge">✓</span>
+              <div class="comp-item-text">
+                <h4>Estabilidad Estética con CSS Subgrid</h4>
+                <p>Todas las cartas del catálogo guardan una estructura simétrica perfecta y limpia, previniendo cualquier desplazamiento visual del feed móvil.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="comp-item-badge">✓</span>
+              <div class="comp-item-text">
+                <h4>Filtros Dinámicos e Inteligentes</h4>
+                <p>Las categorías, colores y talles disponibles se calculan en tiempo real según el stock disponible en Supabase. Todo se sincroniza solo.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="comp-item-badge">✓</span>
+              <div class="comp-item-text">
+                <h4>Pasarela Transaccional Completa</h4>
+                <p>Checkout fluido en 3 pasos con cálculo dinámico de envíos por código postal, cobros con Mercado Pago y reserva temporal de stock segura.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="comp-item-badge">✓</span>
+              <div class="comp-item-text">
+                <h4>Seguridad Zero-Trust y RLS Robusto</h4>
+                <p>Base de datos blindada. Solo usuarios administradores autenticados mediante sesión segura de servidor pueden modificar o añadir prendas al lote.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Adjustments Panel (Based on user comments) -->
+    <section class="feedback-highlight">
+      <h3 class="feedback-title">
+        <span>🎨</span>
+        Ajustes Quirúrgicos Realizados en base a tu Feedback
+      </h3>
+      <p class="feedback-text">Hemos procesado e integrado tus comentarios de hoy de forma inmediata en las especificaciones del mapa de ruta para garantizar que el desarrollo sea 100% fiel a tus necesidades comerciales:</p>
+      
+      <div class="adjustments-grid">
+        
+        <!-- Adj 1: Tags redundantes -->
+        <div class="adj-card">
+          <div class="adj-label">INGESTA DE CATÁLOGO</div>
+          <h4 class="adj-title">Mejora de Extracción en Lugar de Duplicados</h4>
+          <p class="adj-desc">Eliminamos la generación de etiquetas redundantes y la sustituimos por la extracción directa de atributos detallados de diseño en el cargador masivo original, evitando duplicación innecesaria de información.</p>
+        </div>
+
+        <!-- Adj 2: Background removal -->
+        <div class="adj-card">
+          <div class="adj-label">CLOUDINARY MEDIA</div>
+          <h4 class="adj-title">Remoción de Fondos Descartada</h4>
+          <p class="adj-desc">Cancelamos por completo la integración de la remoción automática de fondos (AI Background Removal). Las imágenes del catálogo conservarán íntegramente sus fondos reales aportados en la sesión de fotos.</p>
+        </div>
+
+        <!-- Adj 3: Resend -->
+        <div class="adj-card">
+          <div class="adj-label">MARKETING & EMAILS</div>
+          <h4 class="adj-title">Integración Factible y Gratuita con Resend</h4>
+          <p class="adj-desc">Confirmamos el uso de la API de Resend debido a que su plan gratuito inicial permite hasta 3.000 envíos mensuales y soporte de Edge de alto rendimiento, ideal para arrancar sin costos fijos.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <footer class="footer-cta">
+      <h3>¿Listo para dar el siguiente paso?</h3>
+      <p>Responde a las preguntas de planificación consolidadas para que podamos comenzar la codificación de la primera fase de inmediato.</p>
+      <a href="file:///C:/Users/thiag/.gemini/antigravity/brain/52ae272d-31f3-4f5f-bbfe-2589420f87e7/preguntas_consolidadas.md" class="cta-btn">Ver Preguntas Consolidadas</a>
+    </footer>
+
+  </div>
+
+</body>
+</html>

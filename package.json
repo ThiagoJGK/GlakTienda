@@ -9,13 +9,15 @@
     "lint": "eslint",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "test:supabase": "npx tsx scripts/test-supabase.ts"
   },
   "dependencies": {
     "@google/genai": "^1.50.1",
     "@opennextjs/cloudflare": "^1.19.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.0",
+    "@swc/helpers": "^0.5.23",
     "next": "16.2.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -27,6 +29,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
+    "puppeteer": "^25.1.0",
     "typescript": "^5",
     "wrangler": "^4.81.1"
   }

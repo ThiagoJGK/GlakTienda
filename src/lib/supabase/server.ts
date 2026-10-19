@@ -43,3 +43,33 @@ export async function createClient() {
     }
   );
 }
+
+/**
+ * Creates a cookie-free Supabase server client for use in static generation (generateStaticParams)
+ * and public pages where cookies/auth are not required, preventing automatic opt-out of ISR.
+ */
+export function createPublicClient() {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return [];
+        },
+        setAll() {
+          // No-op for public client
+        },
+      },
+      global: {
+        fetch: (url, options) => {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 8000);
+          return fetch(url, { ...options, signal: controller.signal }).finally(
+            () => clearTimeout(timeout)
+          );
+        },
+      },
+    }
+  );
+}

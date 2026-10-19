@@ -5,17 +5,19 @@ import { useRouter } from 'next/navigation';
 import { UploadingProduct } from './types';
 import Phase1Selection from './Phase1Selection';
 import Phase2Concurrent from './Phase2Concurrent';
-import Phase3Review from './Phase3Review';
+import Phase3Review, { StandardizationOptions } from './Phase3Review';
 import { analyzeProductWithAI, analyzeVariantColorWithAI } from '../geminiActions';
 import { getCollectionsAction, updateProductAction, upsertProductDraftAction, deleteProductDraftAction, getColorsAction, createColorAction } from '../actions';
+import { generateStandardizedPhotosCloudAction } from '../standardizationActions';
 import { ColorVariation } from '@/components/admin/ColorSizesSection';
+import { cloudinaryUrl } from '@/lib/cloudinary/utils';
 
 
 
 const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dpm4judv4";
 const CLOUDINARY_UPLOAD_PRESET = "GlakTienda";
 const LOCAL_STORAGE_KEY = 'glak_bulk_upload_progress_v2';
-export const HISTORY_STORAGE_KEY = 'glak_bulk_upload_history';
+const HISTORY_STORAGE_KEY = 'glak_bulk_upload_history';
 
 export default function BulkUploadPage() {
   const router = useRouter();
@@ -30,6 +32,13 @@ export default function BulkUploadPage() {
   const [globalColors, setGlobalColors] = useState<{id: string, name: string, hex: string}[]>([]);
   const [isSubmittingAll, setIsSubmittingAll] = useState(false);
   const [pendingDraft, setPendingDraft] = useState<{phase: 1 | 2 | 3, products: UploadingProduct[]} | null>(null);
+
+  // Optional AI Photo Standardization configuration
+  const [standardizationConfig, setStandardizationConfig] = useState<StandardizationOptions>({
+    enabled: false,
+    selectedPresets: ['frontal_editorial', 'detalle_textura', 'lifestyle_contexto'],
+    quality: '2k',
+  });
 
   // Supabase real-time draft status
   const [draftStatus, setDraftStatus] = useState<'unsaved' | 'saving' | 'saved' | 'error'>('saved');
@@ -46,7 +55,11 @@ export default function BulkUploadPage() {
       try {
         let success = true;
         for (const p of products) {
-          const res = await upsertProductDraftAction(p);
+          const draftInput = {
+            ...p,
+            tags: Object.values(p.fashionMetadata).filter(Boolean).join(', ')
+          };
+          const res = await upsertProductDraftAction(draftInput);
           if (!res.success) {
             success = false;
           }
@@ -73,7 +86,11 @@ export default function BulkUploadPage() {
     try {
       let success = true;
       for (const p of products) {
-        const res = await upsertProductDraftAction(p);
+        const draftInput = {
+          ...p,
+          tags: Object.values(p.fashionMetadata).filter(Boolean).join(', ')
+        };
+        const res = await upsertProductDraftAction(draftInput);
         if (!res.success) {
           success = false;
         }
@@ -263,7 +280,14 @@ export default function BulkUploadPage() {
               name: aiResult.data.name || p.name,
               description: aiResult.data.description || p.description,
               category: aiResult.data.category || p.category,
-              tags: aiResult.data.tags || p.tags,
+              fashionMetadata: {
+                material: aiResult.data.fashionMetadata?.material || '',
+                fit: aiResult.data.fashionMetadata?.fit || '',
+                style: aiResult.data.fashionMetadata?.style || '',
+                neckline_sleeve: aiResult.data.fashionMetadata?.neckline_sleeve || '',
+                details: aiResult.data.fashionMetadata?.details || '',
+                careInstructions: aiResult.data.fashionMetadata?.careInstructions || ''
+              },
               variations: mappedVariations.length > 0 ? mappedVariations : p.variations,
               aiStatus: 'done'
             };
@@ -306,7 +330,14 @@ export default function BulkUploadPage() {
       name: '',
       description: '',
       category: '',
-      tags: '',
+      fashionMetadata: {
+        material: '',
+        fit: '',
+        style: '',
+        neckline_sleeve: '',
+        details: '',
+        careInstructions: ''
+      },
       price: '',
       collections: [],
       variations: [],
@@ -352,7 +383,7 @@ export default function BulkUploadPage() {
       name: parentProduct.name,
       description: parentProduct.description,
       category: parentProduct.category,
-      tags: parentProduct.tags,
+      fashionMetadata: { ...parentProduct.fashionMetadata },
       price: parentProduct.price,
       collections: parentProduct.collections,
       variations: [],
@@ -418,6 +449,15 @@ export default function BulkUploadPage() {
     for (const p of products) {
       try {
           const publicIds = p.imageUrls.map(url => {
+            if (p.cropStyle && p.cropStyle !== 'original') {
+              return cloudinaryUrl(url, {
+                crop: 'pad',
+                aspectRatio: p.cropStyle,
+                background: p.cropBackground || 'brand',
+                quality: 'auto',
+                format: 'auto'
+              });
+            }
             const parts = url.split('/');
             const last = parts[parts.length - 1];
             return last.split('.')[0]; 
@@ -434,7 +474,7 @@ export default function BulkUploadPage() {
           formData.append("stock", totalStock.toString());
           formData.append("sizes", JSON.stringify(p.variations));
           formData.append("category", p.category || "General");
-          formData.append("tags", p.tags);
+          formData.append("tags", Object.values(p.fashionMetadata).filter(Boolean).join(', '));
           formData.append("status", publishStatus);
           formData.append("images", JSON.stringify(publicIds));
           formData.append("collections", JSON.stringify(p.collections));
@@ -445,6 +485,22 @@ export default function BulkUploadPage() {
           // Omit error breaking loop, let it try the rest for now. 
           // Ideal: stop and show which ones failed.
       }
+    }
+
+    // If AI photo standardization was enabled, trigger cloud generation in the background non-blockingly
+    if (standardizationConfig.enabled) {
+      products.forEach((p) => {
+        if (p.id && p.imageUrls && p.imageUrls.length > 0) {
+          generateStandardizedPhotosCloudAction({
+            productId: p.id,
+            quality: standardizationConfig.quality,
+            requestedPresets: standardizationConfig.selectedPresets,
+            category: p.category,
+          }).catch((err) => {
+            console.warn(`[CargaMasiva] Error encolando estandarización en segundo plano para producto ${p.id}:`, err);
+          });
+        }
+      });
     }
 
     // Save success history
@@ -511,6 +567,8 @@ export default function BulkUploadPage() {
            onSubmitAll={submitAll}
            isSubmittingAll={isSubmittingAll}
            onBack={() => setCurrentPhase(2)}
+           standardizationConfig={standardizationConfig}
+           onUpdateStandardizationConfig={setStandardizationConfig}
         />
       )}
     </>

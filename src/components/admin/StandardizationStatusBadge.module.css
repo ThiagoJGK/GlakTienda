@@ -1,0 +1,66 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.none {
+  background-color: var(--bg-surface-elevated, #F3F4F6);
+  color: var(--text-tertiary, #6B7280);
+}
+
+.pending {
+  background-color: #FEF3C7;
+  color: #D97706;
+}
+
+.processing {
+  background-color: var(--accent-primary, #568203);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.completed {
+  background-color: #D1FAE5;
+  color: #059669;
+}
+
+.failed {
+  background-color: #FEE2E2;
+  color: #DC2626;
+}
+
+.partial {
+  background-color: #FFEDD5;
+  color: #EA580C;
+}
+
+.spinner {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

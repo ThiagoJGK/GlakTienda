@@ -24,6 +24,7 @@ interface CartState {
   removeItem: (id: string, size: string, color: string) => void;
   updateQuantity: (id: string, size: string, color: string, qty: number) => void;
   clearCart: () => void;
+  restoreCart: (items: CartItem[]) => void;
 
   // Computed-like helpers
   totalItems: () => number;
@@ -87,6 +88,7 @@ export const useCartStore = create<CartState>()(
       },
 
       clearCart: () => set({ items: [] }),
+      restoreCart: (items) => set({ items, isOpen: true }),
 
       totalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
       totalPrice: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),

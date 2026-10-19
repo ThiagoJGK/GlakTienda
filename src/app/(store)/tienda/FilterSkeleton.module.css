@@ -1,0 +1,114 @@
+.skeletonContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Performant Shimmer animation utilizing CSS gradients */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-subtle) 25%,
+    rgba(86, 130, 3, 0.05) 50%,
+    var(--bg-subtle) 75%
+  );
+  background-size: 200% 100%;
+  animation: loadingShimmer 1.5s infinite linear;
+}
+
+@keyframes loadingShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none !important;
+    background: var(--bg-subtle) !important;
+  }
+}
+
+.searchSkeleton {
+  width: 100%;
+  height: 42px;
+  border-radius: var(--radius-pill);
+}
+
+.section {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.sectionTitleSkeleton {
+  width: 100px;
+  height: 16px;
+  border-radius: 4px;
+  margin-bottom: var(--space-4);
+}
+
+.collectionsRow {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: hidden;
+  padding-bottom: var(--space-2);
+}
+
+.collectionCardSkeleton {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 84px;
+  border-radius: 16px;
+}
+
+.categoriesRow {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: hidden;
+  padding-bottom: var(--space-2);
+}
+
+.chipSkeleton {
+  flex: 0 0 auto;
+  height: 36px;
+  width: 76px;
+  border-radius: var(--radius-pill);
+}
+
+.swatchesRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.swatchSkeleton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.sizesRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.sizeSkeleton {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+}
+
+@media (min-width: 1024px) {
+  .collectionsRow {
+    flex-wrap: wrap;
+  }
+  .categoriesRow {
+    flex-wrap: wrap;
+  }
+}

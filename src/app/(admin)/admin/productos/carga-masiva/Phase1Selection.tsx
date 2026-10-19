@@ -4,7 +4,7 @@ import React, { useRef } from 'react';
 import styles from './page.module.css';
 import { UploadingProduct } from './types';
 import DraftStatusCloud from './DraftStatusCloud';
-import { HISTORY_STORAGE_KEY } from './page';
+const HISTORY_STORAGE_KEY = 'glak_bulk_upload_history';
 
 interface Props {
   products: UploadingProduct[];

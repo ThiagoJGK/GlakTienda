@@ -1,0 +1,149 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  grid-auto-rows: auto;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+  }
+}
+
+.cardContainer {
+  grid-row: span 5;
+  display: grid;
+  grid-template-rows: subgrid;
+}
+
+.card {
+  grid-row: span 5;
+  display: grid;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid rgba(86, 130, 3, 0.08);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Shimmer gradient and keyframe animation */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-subtle) 25%,
+    rgba(86, 130, 3, 0.05) 50%,
+    var(--bg-subtle) 75%
+  );
+  background-size: 200% 100%;
+  animation: loadingShimmer 1.5s infinite linear;
+}
+
+@keyframes loadingShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none !important;
+    background: var(--bg-subtle) !important;
+  }
+}
+
+.imageSkeleton {
+  grid-row: span 1;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+
+.info {
+  grid-row: span 4;
+  display: grid;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  padding: var(--space-3) var(--space-2) var(--space-2);
+}
+
+.categorySkeleton {
+  grid-row: span 1;
+  height: 12px;
+  width: 50%;
+  border-radius: 4px;
+}
+
+.nameSkeleton {
+  grid-row: span 1;
+  height: 16px;
+  width: 85%;
+  border-radius: 4px;
+}
+
+.priceSkeleton {
+  grid-row: span 1;
+  height: 20px;
+  width: 40%;
+  border-radius: 4px;
+}
+
+.installmentsSkeleton {
+  grid-row: span 1;
+  height: 14px;
+  width: 65%;
+  border-radius: 4px;
+}
+
+/* Fallback for browsers without subgrid support */
+@supports not (grid-template-rows: subgrid) {
+  .cardContainer {
+    display: block;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: var(--space-2);
+  }
+
+  .imageSkeleton {
+    aspect-ratio: 3 / 4;
+    width: 100%;
+  }
+
+  .categorySkeleton {
+    height: 12px;
+  }
+
+  .nameSkeleton {
+    height: 16px;
+  }
+
+  .priceSkeleton {
+    height: 20px;
+  }
+
+  .installmentsSkeleton {
+    height: 14px;
+  }
+}

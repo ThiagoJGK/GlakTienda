@@ -68,6 +68,7 @@ export default async function AdminProductsPage() {
                 <th>Producto</th>
                 <th>Status</th>
                 <th>Inventario</th>
+                <th>Fotos IA</th>
                 <th>Precio</th>
                 <th className={styles.alignRight}>Acciones</th>
               </tr>
@@ -93,6 +94,15 @@ export default async function AdminProductsPage() {
                     <span className={`${styles.stock} ${prop.stock <= 5 ? styles.stockLow : ''}`}>
                       {prop.stock} en stock
                     </span>
+                  </td>
+                  <td>
+                    {prop.standardized_images && prop.standardized_images.length > 0 ? (
+                      <Link href={`/admin/productos/estandarizar/${prop.id}`} className={styles.fotosBadge} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none', color: 'var(--accent-primary)', backgroundColor: 'rgba(86, 130, 3, 0.1)', padding: '4px 8px', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', fontWeight: 600 }}>
+                        ✨ {prop.standardized_images.length}
+                      </Link>
+                    ) : (
+                      <span style={{ color: 'var(--text-tertiary)' }}>—</span>
+                    )}
                   </td>
                   <td className={styles.price}>
                     ${prop.price?.toLocaleString("es-AR")}

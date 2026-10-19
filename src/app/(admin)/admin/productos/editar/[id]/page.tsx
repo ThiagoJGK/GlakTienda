@@ -55,8 +55,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       try {
         // Load collections
         const collRes = await getCollectionsAction();
-        if (collRes.success && collRes.data) {
-          setAllCollections(collRes.data);
+        let collectionsData: { id: string; name: string }[] = [];
+        
+        if (collRes.success && 'data' in collRes && collRes.data) {
+          collectionsData = collRes.data as { id: string; name: string }[];
+          setAllCollections(collectionsData);
         }
 
         // Load Product Data (Basic info first)
@@ -112,9 +115,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         }
 
         // Load selected collections based on pivot
-        if (productCollections.length > 0 && collRes.data) {
+        if (productCollections.length > 0 && collectionsData.length > 0) {
           const selectedColls = productCollections.map((pc) => {
-            const match = collRes.data.find((c) => c.id === pc.collection_id);
+            const match = collectionsData.find((c) => c.id === pc.collection_id);
             return match ? { id: match.id, name: match.name } : null;
           }).filter(Boolean) as { id: string; name: string; isNew?: boolean }[];
           setSelectedCollections(selectedColls);

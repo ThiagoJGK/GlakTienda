@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import styles from './page.module.css';
 import { UploadingProduct } from './types';
+import { cloudinaryUrl } from '@/lib/cloudinary/utils';
+import { StandardizationConfigCard } from '@/components/admin/mass-upload/StandardizationConfigCard';
+
+export interface StandardizationOptions {
+  enabled: boolean;
+  selectedPresets: string[];
+  quality: '1080p' | '2k' | '4k';
+}
 
 interface Props {
   products: UploadingProduct[];
@@ -8,10 +16,30 @@ interface Props {
   onSubmitAll: (status: 'active' | 'draft') => void;
   isSubmittingAll: boolean;
   onBack: () => void;
+  standardizationConfig?: StandardizationOptions;
+  onUpdateStandardizationConfig?: (config: StandardizationOptions) => void;
 }
 
-export default function Phase3Review({ products, updateProductField, onSubmitAll, isSubmittingAll, onBack }: Props) {
+export default function Phase3Review({
+  products,
+  updateProductField,
+  onSubmitAll,
+  isSubmittingAll,
+  onBack,
+  standardizationConfig,
+  onUpdateStandardizationConfig,
+}: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFashionExpanded, setIsFashionExpanded] = useState(true);
+
+  const [localStdConfig, setLocalStdConfig] = useState<StandardizationOptions>({
+    enabled: false,
+    selectedPresets: ['frontal_editorial', 'detalle_textura', 'lifestyle_contexto'],
+    quality: '2k',
+  });
+
+  const activeStdConfig = standardizationConfig || localStdConfig;
+  const handleUpdateStdConfig = onUpdateStandardizationConfig || setLocalStdConfig;
 
   const currentProduct = products[currentIndex];
   
@@ -90,7 +118,19 @@ export default function Phase3Review({ products, updateProductField, onSubmitAll
                     {/* Featured big cover image */}
                     <div className={styles.featuredCoverWrapper}>
                       <img 
-                        src={currentProduct.imageUrls[0]} 
+                        src={
+                          (!currentProduct.cropStyle || currentProduct.cropStyle === 'original')
+                            ? currentProduct.imageUrls[0]
+                            : cloudinaryUrl(currentProduct.imageUrls[0], {
+                                crop: 'pad',
+                                aspectRatio: currentProduct.cropStyle,
+                                background: currentProduct.cropBackground || 'brand',
+                                width: 500,
+                                height: currentProduct.cropStyle === '3:4' ? 666 : 500,
+                                quality: 'auto',
+                                format: 'auto'
+                              })
+                        } 
                         alt="Portada del producto" 
                         className={styles.featuredCoverImg}
                         crossOrigin="anonymous"
@@ -102,16 +142,30 @@ export default function Phase3Review({ products, updateProductField, onSubmitAll
                     {/* Other thumbnail images */}
                     {currentProduct.imageUrls.length > 1 && (
                       <div className={styles.reviewThumbnailsRow}>
-                        {currentProduct.imageUrls.slice(1).map((url, i) => (
-                          <img 
-                            key={i} 
-                            src={url} 
-                            alt={`Preview ${i + 1}`} 
-                            className={styles.reviewThumbnailImg}
-                            crossOrigin="anonymous"
-                            referrerPolicy="no-referrer"
-                          />
-                        ))}
+                        {currentProduct.imageUrls.slice(1).map((url, i) => {
+                          const previewUrl = (!currentProduct.cropStyle || currentProduct.cropStyle === 'original')
+                            ? url
+                            : cloudinaryUrl(url, {
+                                crop: 'pad',
+                                aspectRatio: currentProduct.cropStyle,
+                                background: currentProduct.cropBackground || 'brand',
+                                width: 150,
+                                height: currentProduct.cropStyle === '3:4' ? 200 : 150,
+                                quality: 'auto',
+                                format: 'auto'
+                              });
+
+                          return (
+                            <img 
+                              key={i} 
+                              src={previewUrl} 
+                              alt={`Preview ${i + 1}`} 
+                              className={styles.reviewThumbnailImg}
+                              crossOrigin="anonymous"
+                              referrerPolicy="no-referrer"
+                            />
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -287,21 +341,191 @@ export default function Phase3Review({ products, updateProductField, onSubmitAll
                   <option value="Abrigos">Abrigos</option>
                 </select>
             </div>
+          </section>
 
-            <div className={styles.inputGroup}>
-              <label className={styles.label}>Etiquetas (Separadas por comas)</label>
-              <input 
-                type="text" 
-                className={styles.input}
-                value={currentProduct.tags}
-                onChange={(e) => updateProductField(currentProduct.id, 'tags', e.target.value)}
-              />
+          {/* Card 4: Especificaciones de Moda */}
+          <section className={styles.card}>
+            <div 
+              onClick={() => setIsFashionExpanded(!isFashionExpanded)} 
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+            >
+              <h2 className={styles.cardTitle} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent-primary)' }}>
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                Especificaciones de Moda (IA)
+              </h2>
+              <button 
+                type="button" 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  cursor: 'pointer', 
+                  color: 'var(--text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '4px'
+                }}
+                aria-label={isFashionExpanded ? "Colapsar especificaciones" : "Expandir especificaciones"}
+              >
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  style={{ transform: isFashionExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
             </div>
+
+            {isFashionExpanded && (
+              <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }} className="animate-fade-in">
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 8px 0' }}>
+                  Atributos detallados de la prenda identificados por la Inteligencia Artificial. Puedes editarlos directamente si es necesario.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                  {/* Material */}
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label} style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      🧶 Material
+                    </label>
+                    <input 
+                      type="text"
+                      className={styles.input}
+                      value={currentProduct.fashionMetadata?.material || ''}
+                      onChange={(e) => {
+                        const updatedMeta = { ...currentProduct.fashionMetadata, material: e.target.value };
+                        updateProductField(currentProduct.id, 'fashionMetadata', updatedMeta);
+                      }}
+                      placeholder="Ej: Lino 100%, Algodón"
+                    />
+                  </div>
+
+                  {/* Fit */}
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label} style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      📏 Ajuste / Calce
+                    </label>
+                    <input 
+                      type="text"
+                      className={styles.input}
+                      value={currentProduct.fashionMetadata?.fit || ''}
+                      onChange={(e) => {
+                        const updatedMeta = { ...currentProduct.fashionMetadata, fit: e.target.value };
+                        updateProductField(currentProduct.id, 'fashionMetadata', updatedMeta);
+                      }}
+                      placeholder="Ej: Oversized, Slim Fit, Regular"
+                    />
+                  </div>
+
+                  {/* Style */}
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label} style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      ✨ Estilo
+                    </label>
+                    <input 
+                      type="text"
+                      className={styles.input}
+                      value={currentProduct.fashionMetadata?.style || ''}
+                      onChange={(e) => {
+                        const updatedMeta = { ...currentProduct.fashionMetadata, style: e.target.value };
+                        updateProductField(currentProduct.id, 'fashionMetadata', updatedMeta);
+                      }}
+                      placeholder="Ej: Casual, Boho Chic, Formal"
+                    />
+                  </div>
+
+                  {/* Neckline & Sleeve */}
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label} style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      👕 Cuello y Mangas
+                    </label>
+                    <input 
+                      type="text"
+                      className={styles.input}
+                      value={currentProduct.fashionMetadata?.neckline_sleeve || ''}
+                      onChange={(e) => {
+                        const updatedMeta = { ...currentProduct.fashionMetadata, neckline_sleeve: e.target.value };
+                        updateProductField(currentProduct.id, 'fashionMetadata', updatedMeta);
+                      }}
+                      placeholder="Ej: Cuello redondo manga corta"
+                    />
+                  </div>
+
+                  {/* Details */}
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label} style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      🔍 Detalles
+                    </label>
+                    <input 
+                      type="text"
+                      className={styles.input}
+                      value={currentProduct.fashionMetadata?.details || ''}
+                      onChange={(e) => {
+                        const updatedMeta = { ...currentProduct.fashionMetadata, details: e.target.value };
+                        updateProductField(currentProduct.id, 'fashionMetadata', updatedMeta);
+                      }}
+                      placeholder="Ej: Botones de madera, Tajo lateral"
+                    />
+                  </div>
+
+                  {/* Care Instructions */}
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label} style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      🧼 Cuidado y Lavado
+                    </label>
+                    <input 
+                      type="text"
+                      className={styles.input}
+                      value={currentProduct.fashionMetadata?.careInstructions || ''}
+                      onChange={(e) => {
+                        const updatedMeta = { ...currentProduct.fashionMetadata, careInstructions: e.target.value };
+                        updateProductField(currentProduct.id, 'fashionMetadata', updatedMeta);
+                      }}
+                      placeholder="Ej: Lavar a mano, No centrifugar"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
         </div>
 
         {/* Right Column */}
         <div className={styles.colSide}>
+          {/* Optional AI Standardization Config Card */}
+          <div style={{ marginBottom: '1rem' }}>
+            <StandardizationConfigCard
+              enabled={activeStdConfig.enabled}
+              onToggleEnabled={(enabled) =>
+                handleUpdateStdConfig({ ...activeStdConfig, enabled })
+              }
+              selectedPresets={activeStdConfig.selectedPresets}
+              onTogglePreset={(presetId) => {
+                const exists = activeStdConfig.selectedPresets.includes(presetId);
+                const updated = exists
+                  ? activeStdConfig.selectedPresets.filter((p) => p !== presetId)
+                  : [...activeStdConfig.selectedPresets, presetId];
+                handleUpdateStdConfig({
+                  ...activeStdConfig,
+                  selectedPresets: updated,
+                });
+              }}
+              quality={activeStdConfig.quality}
+              onChangeQuality={(quality) =>
+                handleUpdateStdConfig({ ...activeStdConfig, quality })
+              }
+              productCount={products.length}
+            />
+          </div>
+
           {/* Master Submit Button logic (Imágenes removed as they are embedded in Card 1) */}
           <section className={styles.card} style={{position: 'sticky', top: '24px'}}>
              <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
@@ -327,7 +551,11 @@ export default function Phase3Review({ products, updateProductField, onSubmitAll
                             <polyline points="17 8 12 3 7 8"/>
                             <line x1="12" y1="3" x2="12" y2="15"/>
                           </svg>
-                          <span>Subir Lote (Públicos)</span>
+                          <span>
+                            {activeStdConfig.enabled
+                              ? `Subir Lote y Encolar Fotos IA (${activeStdConfig.selectedPresets.length} tomas/prod)`
+                              : 'Subir Lote (Públicos)'}
+                          </span>
                         </>
                       )}
                    </button>

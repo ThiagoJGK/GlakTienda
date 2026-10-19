@@ -4,6 +4,7 @@ import styles from "./AdminSidebar.module.css";
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: "📊" },
   { href: "/admin/productos", label: "Productos", icon: "📦" },
+  { href: "/admin/productos/estandarizar", label: "Fotos IA", icon: "✨" },
   { href: "/admin/pedidos", label: "Pedidos", icon: "🛒" },
   { href: "/admin/categorias", label: "Categorías", icon: "📂" },
   { href: "/admin/clientes", label: "Clientes", icon: "👥" },

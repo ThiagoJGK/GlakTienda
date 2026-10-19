@@ -1,4 +1,9 @@
+'use client';
+
 import Link from 'next/link';
+import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinary/loader';
+import { formatCurrencySafe } from '@/lib/utils';
 import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
@@ -9,15 +14,6 @@ interface ProductCardProps {
   badge?: string;
   oldPrice?: number;
   category?: string;
-}
-
-function formatPrice(price: number) {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
 }
 
 export default function ProductCard({
@@ -40,35 +36,36 @@ export default function ProductCard({
       </button>
       <Link href={href} className={styles.card} id={`product-${name.toLowerCase().replace(/\s+/g, '-')}`}>
         <div className={styles.imageWrapper}>
-          <img
+          <Image
+            loader={cloudinaryLoader}
             src={image}
             alt={name}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className={styles.image}
-            loading="lazy"
-            decoding="async"
+            unoptimized={false}
           />
           {badge && (
             <span className={styles.badge}>{badge}</span>
           )}
         </div>
         <div className={styles.info}>
-          {category && (
-            <span className={styles.category}>{category}</span>
-          )}
+          <span className={styles.category}>{category || '\u00A0'}</span>
           <h3 className={styles.name}>{name}</h3>
           <div className={styles.priceRow}>
-            <span className={`${styles.price} font-editorial`} suppressHydrationWarning>
-              {formatPrice(price)}
+            <span className={`${styles.price} font-editorial`}>
+              {formatCurrencySafe(price)}
             </span>
             {oldPrice && (
-              <span className={styles.oldPrice} suppressHydrationWarning>{formatPrice(oldPrice)}</span>
+              <span className={styles.oldPrice}>{formatCurrencySafe(oldPrice)}</span>
             )}
           </div>
-          <span className={styles.installments} suppressHydrationWarning>
-            3 cuotas sin interés de {formatPrice(installments)}
+          <span className={styles.installments}>
+            3 cuotas sin interés de {formatCurrencySafe(installments)}
           </span>
         </div>
       </Link>
     </div>
   );
 }
+

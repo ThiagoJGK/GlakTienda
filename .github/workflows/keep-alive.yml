@@ -2,16 +2,72 @@ name: Keep Supabase Awake
 
 on:
   schedule:
-    # Runs every day at 12:00 UTC (9:00 AM Argentina)
-    - cron: '0 12 */3 * *'
-  workflow_dispatch: # Allows you to manually trigger the ping from GitHub's UI
+    # Runs daily at 12:00 UTC (9:00 AM Argentina ART)
+    - cron: '0 12 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub's UI
 
 jobs:
   ping_db:
+    name: Ping Supabase Database
     runs-on: ubuntu-latest
     steps:
       - name: Ping Supabase REST API
+        env:
+          SECRET_SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SECRET_SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_ANON_KEY || secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
-          curl -i -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/products?select=id&limit=1" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          set -euo pipefail
+
+          # 1. Fallback and sanitization
+          SUPABASE_URL="${SECRET_SUPABASE_URL}"
+          SUPABASE_KEY="${SECRET_SUPABASE_KEY}"
+
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::Missing Supabase URL! Please add SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL to GitHub Repository Secrets (Settings -> Secrets and variables -> Actions)."
+            exit 1
+          fi
+
+          if [ -z "$SUPABASE_KEY" ]; then
+            echo "::error::Missing Supabase API Key! Please add SUPABASE_ANON_KEY, NEXT_PUBLIC_SUPABASE_ANON_KEY, or SUPABASE_SERVICE_ROLE_KEY to GitHub Repository Secrets."
+            exit 1
+          fi
+
+          # Strip trailing slash from URL if present
+          SUPABASE_URL="${SUPABASE_URL%/}"
+
+          # Target endpoint: REST API query on products table to trigger Postgres wake-up
+          TARGET_ENDPOINT="${SUPABASE_URL}/rest/v1/products?select=id&limit=1"
+
+          echo "Pinging Supabase REST API at: ${TARGET_ENDPOINT}"
+
+          # 2. Execute curl with timeout and capture response
+          HTTP_RESPONSE=$(curl -s -S -w "\nHTTP_STATUS:%{http_code}\nTIME_TOTAL:%{time_total}s" \
+            --connect-timeout 10 \
+            --max-time 15 \
+            -X GET "$TARGET_ENDPOINT" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: GlakTienda-KeepAlive/1.0" || true)
+
+          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | grep "HTTP_STATUS:" | cut -d':' -f2 || true)
+          HTTP_STATUS="${HTTP_STATUS:-000}"
+          TIME_TOTAL=$(echo "$HTTP_RESPONSE" | grep "TIME_TOTAL:" | cut -d':' -f2 || true)
+          TIME_TOTAL="${TIME_TOTAL:-0s}"
+          BODY=$(echo "$HTTP_RESPONSE" | grep -v "HTTP_STATUS:" | grep -v "TIME_TOTAL:" || true)
+
+          echo "Response HTTP Status: ${HTTP_STATUS}"
+          echo "Response Time: ${TIME_TOTAL}"
+
+          # 3. Handle response status
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "✅ Supabase project is active and responding successfully (HTTP $HTTP_STATUS)!"
+          elif [ "$HTTP_STATUS" -eq 401 ] || [ "$HTTP_STATUS" -eq 403 ]; then
+            echo "::warning::Supabase host responded with HTTP $HTTP_STATUS. The database instance is awake, but please verify your API key and RLS policies."
+            echo "Response: $BODY"
+          elif [ "$HTTP_STATUS" -eq 000 ] || [ -z "$HTTP_STATUS" ]; then
+            echo "::error::Could not connect to Supabase host! Possible cause: Project is PAUSED in Supabase Dashboard (DNS unresolvable), or network timeout. Check https://supabase.com/dashboard to restore/unpause."
+            exit 1
+          else
+            echo "::warning::Unexpected HTTP status: $HTTP_STATUS. Response: $BODY"
+          fi

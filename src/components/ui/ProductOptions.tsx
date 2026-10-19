@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useRouter } from 'next/navigation';
+import { formatCurrencySafe } from '@/lib/utils';
 import styles from './ProductOptions.module.css';
 
 const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dpm4judv4";
@@ -225,11 +226,11 @@ export default function ProductOptions({ initialProduct, siblings, children }: P
         {/* Render active product header Row dynamically inside to be responsive */}
         <div className={styles.headerRow}>
           <div>
-            <h1 className={styles.productName}>{activeProduct.name}</h1>
+            <h1 className={`${styles.productName} font-editorial`}>{activeProduct.name}</h1>
             <span className={styles.brand}>{activeProduct.category || 'Glak Originals'}</span>
           </div>
           <span className={`${styles.price} font-editorial`}>
-            ${activeProduct.price?.toLocaleString('es-AR')}
+            {formatCurrencySafe(activeProduct.price)}
           </span>
         </div>
 

@@ -1579,6 +1579,112 @@
   }
 }
 
+/* --- Premium Crop Selectors --- */
+.cropSelectorContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 1.25rem 1.25rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle, rgba(86, 130, 3, 0.12));
+}
+
+.cropLabel {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-primary, #568203);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cropButtonGroup {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.cropBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px;
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--border-input, #D4D0C8);
+  background-color: var(--bg-surface, #FFFFFF);
+  color: var(--text-secondary, #5C5C52);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.cropBtn:hover {
+  border-color: var(--accent-primary, #568203);
+  background-color: var(--accent-light, rgba(86, 130, 3, 0.08));
+  color: var(--accent-primary, #568203);
+}
+
+.cropBtnActive {
+  border-color: var(--accent-primary, #568203);
+  background-color: var(--accent-light, rgba(86, 130, 3, 0.08));
+  color: var(--accent-primary, #568203);
+  font-weight: 700;
+  box-shadow: 0 0 0 1px var(--accent-primary, #568203);
+}
+
+/* Background toggle styles when padding is active */
+.bgSelectorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.bgSelectorLabel {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary, #5C5C52);
+}
+
+.bgButtonGroup {
+  display: flex;
+  gap: 6px;
+}
+
+.bgBtn {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-input, #D4D0C8);
+  background-color: var(--bg-surface, #FFFFFF);
+  color: var(--text-secondary, #5C5C52);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.bgBtn:hover {
+  border-color: var(--accent-primary, #568203);
+  background-color: var(--accent-light, rgba(86, 130, 3, 0.08));
+  color: var(--accent-primary, #568203);
+}
+
+.bgBtnActive {
+  border-color: var(--accent-primary, #568203);
+  background-color: var(--accent-primary, #568203);
+  color: var(--bg-surface, #FFFFFF);
+}
+
 
 
 

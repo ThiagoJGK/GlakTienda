@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './page.module.css';
 import { UploadingProduct } from './types';
 import Step2Sizes from './Step2Sizes';
+import { cloudinaryUrl } from '@/lib/cloudinary/utils';
 
 interface Props {
   products: UploadingProduct[];
@@ -100,10 +101,10 @@ export default function Phase2Concurrent({ products, updateProductField, onProce
                       </span>
                     )}
                     <button 
-                      type="button"
-                      onClick={() => onRemoveProduct(p.id)}
-                      className={styles.btnRemoveProductF1}
-                      style={{marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px'}}
+                       type="button"
+                       onClick={() => onRemoveProduct(p.id)}
+                       className={styles.btnRemoveProductF1}
+                       style={{marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px'}}
                     >
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"/>
@@ -115,17 +116,94 @@ export default function Phase2Concurrent({ products, updateProductField, onProce
                </div>
 
                <div className={styles.miniGalleryScroll}>
-                 {p.imageUrls.map((url, i) => (
-                   <img 
-                     key={i} 
-                     src={url} 
-                     alt={`Vista previa producto ${index + 1}`} 
-                     className={styles.miniGalleryImg} 
-                     crossOrigin="anonymous"
-                     referrerPolicy="no-referrer"
-                   />
-                 ))}
+                 {p.imageUrls.map((url, i) => {
+                   const previewUrl = (!p.cropStyle || p.cropStyle === 'original')
+                     ? url
+                     : cloudinaryUrl(url, {
+                         crop: 'pad',
+                         aspectRatio: p.cropStyle,
+                         background: p.cropBackground || 'brand',
+                         width: 200,
+                         height: p.cropStyle === '3:4' ? 266 : 200,
+                         quality: 'auto',
+                         format: 'auto'
+                       });
+
+                   const is3to4 = p.cropStyle === '3:4';
+                   const aspectStyle = is3to4 
+                     ? { aspectRatio: '3 / 4', width: '54px', height: '72px', objectFit: 'cover' as const } 
+                     : { aspectRatio: '1 / 1', width: '72px', height: '72px', objectFit: 'cover' as const };
+
+                   return (
+                     <img 
+                       key={i} 
+                       src={previewUrl} 
+                       alt={`Vista previa producto ${index + 1}`} 
+                       className={styles.miniGalleryImg} 
+                       style={aspectStyle}
+                       crossOrigin="anonymous"
+                       referrerPolicy="no-referrer"
+                     />
+                   );
+                 })}
                  {p.uploadStatus === 'uploading' && <div className={styles.miniGalleryImg}>Subiendo...</div>}
+               </div>
+
+               {/* Premium Crop Selectors */}
+               <div className={styles.cropSelectorContainer}>
+                 <div className={styles.cropLabel}>
+                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                     <path d="M6.13 1L6 16a2 2 0 0 0 2 2h15"/>
+                     <path d="M1 6.13L16 6a2 2 0 0 1 2 2v15"/>
+                   </svg>
+                   <span>Encuadre E-Commerce Smart Crop</span>
+                 </div>
+                 
+                 <div className={styles.cropButtonGroup}>
+                   <button
+                     type="button"
+                     className={`${styles.cropBtn} ${(!p.cropStyle || p.cropStyle === 'original') ? styles.cropBtnActive : ''}`}
+                     onClick={() => updateProductField(p.id, 'cropStyle', 'original')}
+                   >
+                     <span>Original</span>
+                   </button>
+                   <button
+                     type="button"
+                     className={`${styles.cropBtn} ${p.cropStyle === '3:4' ? styles.cropBtnActive : ''}`}
+                     onClick={() => updateProductField(p.id, 'cropStyle', '3:4')}
+                   >
+                     <span>Vertical 3:4</span>
+                   </button>
+                   <button
+                     type="button"
+                     className={`${styles.cropBtn} ${p.cropStyle === '1:1' ? styles.cropBtnActive : ''}`}
+                     onClick={() => updateProductField(p.id, 'cropStyle', '1:1')}
+                   >
+                     <span>Cuadrado 1:1</span>
+                   </button>
+                 </div>
+
+                 {p.cropStyle && p.cropStyle !== 'original' && (
+                   <div className={styles.bgSelectorContainer}>
+                     <span className={styles.bgSelectorLabel}>Fondo de Relleno:</span>
+                     <div className={styles.bgButtonGroup}>
+                       <button
+                         type="button"
+                         className={`${styles.bgBtn} ${(!p.cropBackground || p.cropBackground === 'brand') ? styles.bgBtnActive : ''}`}
+                         onClick={() => updateProductField(p.id, 'cropBackground', 'brand')}
+                       >
+                         Crema Glak
+                       </button>
+                       <button
+                         type="button"
+                         className={`${styles.bgBtn} ${p.cropBackground === 'white' ? styles.bgBtnActive : ''}`}
+                         onClick={() => updateProductField(p.id, 'cropBackground', 'white')}
+                       >
+                         Blanco Puro
+                       </button>
+                     </div>
+                   </div>
+                 )}
                </div>
 
                <div className={styles.mobileCardBody}>
