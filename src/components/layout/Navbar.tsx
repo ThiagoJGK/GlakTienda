@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { Menu, ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import styles from "./Navbar.module.css";
 import dynamic from 'next/dynamic';
@@ -43,11 +44,7 @@ export default function Navbar() {
               aria-label="Abrir menú" 
               onClick={() => setIsSidebarOpen(true)}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
+              <Menu size={24} strokeWidth={2} />
             </button>
           </div>
 
@@ -71,11 +68,7 @@ export default function Navbar() {
               aria-label="Abrir carrito"
               onClick={openCart}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                <path d="M3 6h18" />
-                <path d="M16 10a4 4 0 0 1-8 0" />
-              </svg>
+              <ShoppingBag size={24} strokeWidth={2} />
               {count > 0 && (
                 <span className={styles.cartBadge}>{count}</span>
               )}

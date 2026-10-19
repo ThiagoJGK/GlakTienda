@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
 import HeroSearch from './HeroSearch';
 import styles from './Hero.module.css';
 
@@ -21,7 +22,9 @@ export default function Hero() {
           />
           <div className={styles.sliderOverlay}>
             <div className={styles.sliderContent}>
-              <span className={styles.tagline}>NUEVA TEMPORADA 🍂✨</span>
+              <span className={styles.tagline} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                NUEVA TEMPORADA <Sparkles size={14} aria-hidden="true" />
+              </span>
               <h1 className={`${styles.title} font-editorial`}>Dejanos<br/>ayudarte</h1>
               <Link href="/tienda" className={`btn btn-primary btn-sm ${styles.cta}`}>
                 Descubrí los outfits

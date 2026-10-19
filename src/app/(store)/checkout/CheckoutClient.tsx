@@ -12,6 +12,15 @@ import {
   markCartAsConvertedAction
 } from './actions';
 import { getShippingOptions, ShippingOption } from './shippingActions';
+import { 
+  ShoppingCart, 
+  AlertTriangle, 
+  Loader2, 
+  Clock, 
+  Timer, 
+  Lock, 
+  CreditCard 
+} from 'lucide-react';
 
 /**
  * Unique key for saving checkout shipping details in localStorage.
@@ -294,7 +303,9 @@ export default function CheckoutClient() {
   if (items.length === 0) {
     return (
       <div className="container" style={{ padding: '6rem 1rem', textAlign: 'center', minHeight: '60vh' }}>
-        <span style={{ fontSize: '4rem', display: 'block', marginBottom: '1.5rem' }}>🛒</span>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+          <ShoppingCart size={64} style={{ color: 'var(--text-tertiary)' }} strokeWidth={1.5} aria-hidden="true" />
+        </div>
         <h2 style={{ fontFamily: 'var(--font-outfit)', fontSize: 'var(--text-3xl)', marginBottom: '1rem' }}>Tu carrito está vacío</h2>
         <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto 2rem auto' }}>
           No tenés productos agregados para realizar el checkout. Agregá algunas prendas exclusivas en la tienda.
@@ -400,7 +411,7 @@ export default function CheckoutClient() {
           alignItems: 'center',
           gap: 'var(--space-2)'
         }}>
-          <span>⚠️</span>
+          <AlertTriangle size={18} style={{ flexShrink: 0 }} aria-hidden="true" />
           <span>{errorMsg}</span>
         </div>
       )}
@@ -524,8 +535,8 @@ export default function CheckoutClient() {
               </h2>
 
               {loadingShipping ? (
-                <div style={{ padding: 'var(--space-8) 0', textAlign: 'center' }}>
-                  <span style={{ fontSize: '2rem', display: 'block', animation: 'spin 1.5s linear infinite' }}>🔄</span>
+                <div style={{ padding: 'var(--space-8) 0', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <Loader2 size={32} style={{ animation: 'spin 1.5s linear infinite', color: 'var(--accent-primary)' }} aria-hidden="true" />
                   <p style={{ color: 'var(--text-secondary)', marginTop: 'var(--space-3)' }}>Cotizando tarifas en Correo Argentino y Andreani...</p>
                 </div>
               ) : (
@@ -553,8 +564,11 @@ export default function CheckoutClient() {
                           <span>{opt.serviceName}</span>
                           <span style={{ color: 'var(--accent-primary)' }}>${opt.cost.toLocaleString('es-AR')}</span>
                         </div>
-                        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginTop: 'var(--space-1)', display: 'flex', justifyContent: 'space-between' }}>
-                          <span>🕒 {opt.days}</span>
+                        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginTop: 'var(--space-1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Clock size={12} aria-hidden="true" />
+                            {opt.days}
+                          </span>
                           <span style={{ textTransform: 'capitalize', fontStyle: 'italic' }}>{opt.type}</span>
                         </div>
                       </div>
@@ -594,7 +608,7 @@ export default function CheckoutClient() {
                   gap: 'var(--space-2)',
                   border: '1px solid rgba(86, 130, 3, 0.15)'
                 }}>
-                  <span>⏱️</span>
+                  <Timer size={14} style={{ color: 'var(--accent-primary)' }} aria-hidden="true" />
                   <span>Reserva: {formatTime(timerSeconds)}</span>
                 </div>
               </div>
@@ -608,7 +622,10 @@ export default function CheckoutClient() {
                 fontSize: 'var(--text-sm)',
                 lineHeight: 1.5
               }}>
-                <strong style={{ color: 'var(--accent-primary)', display: 'block', marginBottom: '4px' }}>🔒 Stock Reservado en Exclusividad</strong>
+                <strong style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <Lock size={14} aria-hidden="true" />
+                  Stock Reservado en Exclusividad
+                </strong>
                 Tu selección de indumentaria se encuentra bloqueada por 15 minutos en nuestro stock de depósito para que puedas completar tu pago sin riesgos de sobreventa.
               </div>
 
@@ -640,9 +657,12 @@ export default function CheckoutClient() {
                     <span style={{ color: 'var(--text-secondary)' }}>Localidad: </span>
                     <span>{form.city}, {form.state} (CP {form.zipCode})</span>
                   </div>
-                  <div style={{ marginTop: 'var(--space-2)', paddingTop: 'var(--space-2)', borderTop: '1.5px dashed var(--border-strong)' }}>
+                  <div style={{ marginTop: 'var(--space-2)', paddingTop: 'var(--space-2)', borderTop: '1.5px dashed var(--border-strong)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Flete: </span>
-                    <strong>{selectedShipping?.serviceName}</strong> (🕒 {selectedShipping?.days})
+                    <strong>{selectedShipping?.serviceName}</strong>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: 'var(--text-secondary)', fontSize: 'var(--text-xs)' }}>
+                      (<Clock size={11} aria-hidden="true" /> {selectedShipping?.days})
+                    </span>
                   </div>
                 </div>
               </div>
@@ -654,11 +674,11 @@ export default function CheckoutClient() {
                 <button onClick={handlePayment} className="btn btn-primary" style={{ flex: 2, gap: 'var(--space-3)' }} disabled={loading}>
                   {loading ? (
                     <>
-                      <span style={{ animation: 'spin 1.5s linear infinite' }}>🔄</span> Procesando pago...
+                      <Loader2 size={18} style={{ animation: 'spin 1.5s linear infinite' }} aria-hidden="true" /> Procesando pago...
                     </>
                   ) : (
                     <>
-                      💳 PAGAR CON MERCADO PAGO
+                      <CreditCard size={18} aria-hidden="true" /> PAGAR CON MERCADO PAGO
                     </>
                   )}
                 </button>
