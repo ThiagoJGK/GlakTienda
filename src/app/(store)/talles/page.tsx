@@ -1,117 +1,250 @@
-import Link from 'next/link';
-import type { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Guía de Talles — Glak',
-  description: 'Encontrá tu talle ideal con nuestra guía de medidas. Moda femenina Glak.',
-};
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { IRAM_75300_TABLES } from '@/lib/sizing/iramStandards';
+import { SizeGenderProfile } from '@/types/sizing';
 
 export default function TallesPage() {
+  const [activeGender, setActiveGender] = useState<SizeGenderProfile>('female');
+
+  const currentTable = IRAM_75300_TABLES[activeGender];
+
   return (
-    <div className="container" style={{ padding: '3rem 1rem', maxWidth: 800, margin: '0 auto' }}>
-      <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 700, marginBottom: '0.5rem' }}>
-        Guía de Talles
-      </h1>
-      <p style={{ fontSize: 'var(--text-base)', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.6 }}>
-        Antes de ver la tabla tradicional, tené en cuenta cómo se diseña nuestra colección europea.
-      </p>
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '3rem 1.25rem 5rem' }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            backgroundColor: 'rgba(86, 130, 3, 0.08)',
+            color: '#15803d',
+            padding: '6px 14px',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            marginBottom: '1rem',
+          }}
+        >
+          <span>⚖️</span> Ley Nacional de Talles N° 27.521 · SUNITI · Norma IRAM 75300
+        </div>
+        <h1
+          style={{
+            fontSize: '2.5rem',
+            fontWeight: 800,
+            marginBottom: '0.75rem',
+            color: '#0f172a',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Tabla de Talles Oficial Argentina
+        </h1>
+        <p style={{ fontSize: '1.05rem', color: '#64748b', maxWidth: 640, margin: '0 auto', lineHeight: 1.6 }}>
+          En GLak Tienda todas nuestras prendas están estandarizadas bajo el Sistema Único Normalizado
+          de Identificación de Talles de Indumentaria (SUNITI), garantizando correspondencia real entre
+          medidas corporales y etiquetas.
+        </p>
+      </div>
 
       {/* Italian Fashion Manifesto Info */}
-      <div style={{
-        padding: '1.5rem',
-        background: 'var(--bg-surface)',
-        borderRadius: 'var(--radius-xl)',
-        border: '1px solid var(--accent-primary)',
-        marginBottom: '2rem',
-        boxShadow: '0 4px 12px rgba(86, 130, 3, 0.05)'
-      }}>
-        <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, marginBottom: '1rem', color: 'var(--accent-primary)' }}>
-          🇮🇹 Nota sobre la Colección Italiana
-        </h2>
-        <div style={{ fontSize: 'var(--text-md)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-          <p style={{marginBottom: '1rem'}}>
-            Fiel a su estética y caída natural europea, nuestra <strong>Colección de Lino Italiano se maneja en &quot;Talle Único&quot; orgánico.</strong>
+      <div
+        style={{
+          padding: '1.75rem',
+          background: 'linear-gradient(135deg, #fdfbf7 0%, #f7f4ee 100%)',
+          borderRadius: '16px',
+          border: '1px solid #e7dfd5',
+          marginBottom: '2.5rem',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.75rem' }}>
+          <span style={{ fontSize: '1.5rem' }}>🇮🇹</span>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: '#334155' }}>
+            Nota sobre la Colección de Lino Italiano &quot;Talle Único&quot;
+          </h2>
+        </div>
+        <div style={{ fontSize: '0.925rem', color: '#64748b', lineHeight: 1.75 }}>
+          <p style={{ marginBottom: '0.75rem' }}>
+            Fiel a su estética y caída natural europea, nuestra <strong>Colección de Lino Italiano se confecciona en &quot;Talle Único&quot; orgánico (U)</strong> con calce oversize / relajado.
           </p>
-          <p>
-            Esto significa que las prendas tienen un corte diseñado específicamente de forma holgada.
-            Gracias al peso y caída premium de la tela, <strong>se adaptan y estilizan al instante cualquier figura</strong>, garantizando comodidad sin apretar ni marcar.
+          <p style={{ margin: 0 }}>
+            Gracias a la generosa amplitud de sisa (58 a 64 cm en plano) y la nobleza de la fibra de lino puro,
+            la prenda tiene una caída fluida que estiliza y se adapta confortablemente a contornos corporales
+            desde el talle S (38) hasta el XL (50), sin ajustar ni perder estructura.
           </p>
         </div>
       </div>
 
-      {/* Size table */}
-      <div style={{ overflowX: 'auto', marginBottom: '2rem' }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          fontSize: 'var(--text-sm)',
-          minWidth: 400,
-        }}>
-          <thead>
-            <tr style={{ background: 'var(--accent-primary)', color: '#fff' }}>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600 }}>Talle</th>
-              <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600 }}>Busto (cm)</th>
-              <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600 }}>Cintura (cm)</th>
-              <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600 }}>Cadera (cm)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              { talle: 'XS', busto: '80-84', cintura: '62-66', cadera: '86-90' },
-              { talle: 'S', busto: '84-88', cintura: '66-70', cadera: '90-94' },
-              { talle: 'M', busto: '88-92', cintura: '70-74', cadera: '94-98' },
-              { talle: 'L', busto: '92-96', cintura: '74-78', cadera: '98-102' },
-              { talle: 'XL', busto: '96-100', cintura: '78-82', cadera: '102-106' },
-            ].map((row, i) => (
-              <tr key={row.talle} style={{
-                borderBottom: '1px solid var(--border-subtle)',
-                background: i % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-primary)',
-              }}>
-                <td style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--accent-primary)' }}>{row.talle}</td>
-                <td style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--text-secondary)' }}>{row.busto}</td>
-                <td style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--text-secondary)' }}>{row.cintura}</td>
-                <td style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--text-secondary)' }}>{row.cadera}</td>
+      {/* Gender Profile Tabs */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '10px',
+          marginBottom: '1.5rem',
+        }}
+      >
+        {[
+          { id: 'female', label: 'Indumentaria Femenina (IRAM 75300-1)' },
+          { id: 'male', label: 'Indumentaria Masculina (IRAM 75300-2)' },
+          { id: 'unisex', label: 'Indumentaria Unisex' },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveGender(tab.id as SizeGenderProfile)}
+            style={{
+              padding: '10px 18px',
+              borderRadius: '10px',
+              border: activeGender === tab.id ? '2px solid #16a34a' : '1px solid #cbd5e1',
+              backgroundColor: activeGender === tab.id ? '#f0fdf4' : '#ffffff',
+              color: activeGender === tab.id ? '#15803d' : '#475569',
+              fontWeight: activeGender === tab.id ? 700 : 500,
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Size Table Card */}
+      <div
+        style={{
+          background: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+          overflow: 'hidden',
+          marginBottom: '2.5rem',
+        }}
+      >
+        <div style={{ overflowX: 'auto' }}>
+          <table
+            style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '0.875rem',
+              textAlign: 'left',
+            }}
+          >
+            <thead>
+              <tr style={{ background: '#0f172a', color: '#ffffff' }}>
+                <th style={{ padding: '14px 16px', fontWeight: 600 }}>Talle GLak</th>
+                <th style={{ padding: '14px 16px', fontWeight: 600, textAlign: 'center' }}>Equiv. Numérica AR</th>
+                <th style={{ padding: '14px 16px', fontWeight: 600, textAlign: 'center' }}>Equiv. US</th>
+                <th style={{ padding: '14px 16px', fontWeight: 600, textAlign: 'center' }}>Contorno Pecho/Busto</th>
+                <th style={{ padding: '14px 16px', fontWeight: 600, textAlign: 'center' }}>Contorno Cintura</th>
+                <th style={{ padding: '14px 16px', fontWeight: 600, textAlign: 'center' }}>Contorno Cadera</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* How to measure */}
-      <div style={{
-        padding: '1.5rem',
-        background: 'var(--bg-surface)',
-        borderRadius: 'var(--radius-xl)',
-        border: '1px solid var(--border-subtle)',
-        marginBottom: '2rem',
-      }}>
-        <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, marginBottom: '1rem' }}>
-          📏 ¿Cómo tomarse las medidas?
-        </h2>
-        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-          <ol style={{ paddingLeft: '1.5rem' }}>
-            <li><strong>Busto:</strong> Medí la parte más ancha del pecho, pasando la cinta por debajo de las axilas.</li>
-            <li><strong>Cintura:</strong> Medí la parte más angosta del torso, generalmente a la altura del ombligo.</li>
-            <li><strong>Cadera:</strong> Medí la parte más ancha de la cadera.</li>
-          </ol>
+            </thead>
+            <tbody>
+              {currentTable.map((row, idx) => (
+                <tr
+                  key={row.size}
+                  style={{
+                    borderBottom: '1px solid #f1f5f9',
+                    backgroundColor: idx % 2 === 0 ? '#ffffff' : '#f8fafc',
+                  }}
+                >
+                  <td style={{ padding: '14px 16px', fontWeight: 700, color: '#16a34a' }}>
+                    {row.size}
+                  </td>
+                  <td style={{ padding: '14px 16px', textAlign: 'center', fontWeight: 600, color: '#334155' }}>
+                    {row.numericSize}
+                  </td>
+                  <td style={{ padding: '14px 16px', textAlign: 'center', color: '#64748b' }}>
+                    {row.jeansUsEquivalent}
+                  </td>
+                  <td style={{ padding: '14px 16px', textAlign: 'center', color: '#0f172a' }}>
+                    {row.chestCm.min} – {row.chestCm.max} cm
+                  </td>
+                  <td style={{ padding: '14px 16px', textAlign: 'center', color: '#0f172a' }}>
+                    {row.waistCm.min} – {row.waistCm.max} cm
+                  </td>
+                  <td style={{ padding: '14px 16px', textAlign: 'center', color: '#0f172a' }}>
+                    {row.hipCm.min} – {row.hipCm.max} cm
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Tip */}
-      <div style={{
-        padding: '1rem 1.5rem',
-        background: 'rgba(86, 130, 3, 0.08)',
-        borderRadius: 'var(--radius-lg)',
-        fontSize: 'var(--text-sm)',
-        color: 'var(--text-secondary)',
-        marginBottom: '2rem',
-      }}>
-        💡 <strong>Tip:</strong> Si estás entre dos talles, te recomendamos elegir el más grande para mayor comodidad.
+      {/* Guide: Flat vs Body Contour & Calce */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '20px',
+          marginBottom: '2.5rem',
+        }}
+      >
+        {/* Card 1: Medidas en Plano vs Contorno */}
+        <div
+          style={{
+            padding: '1.5rem',
+            background: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '1.25rem' }}>📐</span>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+              Medida en Plano vs Contorno Corporal
+            </h3>
+          </div>
+          <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+            Las tablas oficiales expresan <strong>contorno corporal 360°</strong> (la circunferencia total de tu cuerpo).
+            En cambio, en las fichas de producto también te mostramos las <strong>medidas en plano</strong> (la prenda apoyada en una mesa midiendo el ancho de costura a costura).
+            Para prendas sin elasticidad, el contorno corporal equivale aproximadamente al doble del ancho en plano menos la holgura del corte.
+          </p>
+        </div>
+
+        {/* Card 2: Cómo medirse */}
+        <div
+          style={{
+            padding: '1.5rem',
+            background: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '1.25rem' }}>📏</span>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+              ¿Cómo tomarte las medidas?
+            </h3>
+          </div>
+          <ul style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.6, margin: 0, paddingLeft: '1.25rem' }}>
+            <li><strong>Busto / Pecho:</strong> Pasá la cinta por la parte más prominente del torso sin apretar.</li>
+            <li><strong>Cintura:</strong> Medí la parte más estrecha del abdomen natural.</li>
+            <li><strong>Cadera:</strong> Parate con los talones juntos y medí la parte más ancha de los glúteos.</li>
+          </ul>
+        </div>
       </div>
 
+      {/* Return button */}
       <div style={{ textAlign: 'center' }}>
-        <Link href="/tienda" style={{ color: 'var(--accent-primary)', fontSize: 'var(--text-sm)', fontWeight: 500 }}>
-          ← Volver a la tienda
+        <Link
+          href="/tienda"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            color: '#16a34a',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            textDecoration: 'none',
+          }}
+        >
+          ← Explorar la Colección en la Tienda
         </Link>
       </div>
     </div>

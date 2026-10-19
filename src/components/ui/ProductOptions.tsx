@@ -5,6 +5,8 @@ import { useCartStore } from '@/stores/cartStore';
 import { useRouter } from 'next/navigation';
 import { formatCurrencySafe } from '@/lib/utils';
 import styles from './ProductOptions.module.css';
+import SizeGuideModal from '@/components/store/SizeGuideModal';
+import { EnrichedSizeStock } from '@/types/sizing';
 
 const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dpm4judv4";
 
@@ -23,6 +25,11 @@ const defaultColors = [
 interface SizeStock {
   name: string;
   stock: number;
+  supplierSizeLabel?: string;
+  supplierName?: string;
+  numericSize?: string;
+  measurementsFlatCm?: any;
+  bodyContourRangeCm?: any;
 }
 
 interface ColorVariation {
@@ -99,9 +106,34 @@ function getNormalizedProductData(product: ProductType) {
   return { images, sizes, colors };
 }
 
+function getActiveSizesWithStock(product: ProductType, selectedColorName?: string): EnrichedSizeStock[] {
+  if (!product.sizes || !Array.isArray(product.sizes) || product.sizes.length === 0) {
+    return defaultSizes.map(s => ({ name: s, stock: 10 }));
+  }
+
+  const firstItem = product.sizes[0];
+  if (typeof firstItem === 'object' && firstItem !== null && 'sizes' in firstItem) {
+    const variations = product.sizes as ColorVariation[];
+    const matchingVariation = variations.find(
+      v => v.name?.trim().toLowerCase() === selectedColorName?.trim().toLowerCase()
+    ) || variations[0];
+    if (matchingVariation && Array.isArray(matchingVariation.sizes)) {
+      return matchingVariation.sizes as EnrichedSizeStock[];
+    }
+  }
+
+  return (product.sizes as any[]).map(s => {
+    if (typeof s === 'object' && s !== null && 'name' in s) {
+      return s as EnrichedSizeStock;
+    }
+    return { name: String(s), stock: 10 };
+  });
+}
+
 export default function ProductOptions({ initialProduct, siblings, children }: ProductOptionsProps) {
   const [prevInitialProduct, setPrevInitialProduct] = useState(initialProduct);
   const [activeProduct, setActiveProduct] = useState(initialProduct);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   const { images, sizes } = getNormalizedProductData(activeProduct);
 
@@ -114,6 +146,9 @@ export default function ProductOptions({ initialProduct, siblings, children }: P
 
   const addItem = useCartStore((s) => s.addItem);
   const router = useRouter();
+
+  const activeSizesWithStock = getActiveSizesWithStock(activeProduct, selectedColor);
+  const activeEnrichedSize = activeSizesWithStock.find(s => s.name === selectedSize);
 
   // Sync state in render path if initialProduct changes from parent (e.g. page navigation)
   if (initialProduct !== prevInitialProduct) {
@@ -135,6 +170,10 @@ export default function ProductOptions({ initialProduct, siblings, children }: P
   };
 
   const handleAdd = () => {
+    if (activeEnrichedSize?.stock === 0) {
+      alert(`El talle ${selectedSize} se encuentra agotado temporalmente.`);
+      return;
+    }
     addItem({
       id: activeProduct.id,
       name: activeProduct.name,
@@ -266,20 +305,98 @@ export default function ProductOptions({ initialProduct, siblings, children }: P
 
         {/* Size selector */}
         <div className={styles.optionGroup}>
-          <div className={styles.sizeHeader}>
-            <span className={styles.optionLabel}>Talle seleccionado: <strong>{selectedSize}</strong></span>
+          <div className={styles.sizeHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span className={styles.optionLabel}>
+              Talle: <strong>{selectedSize}</strong>
+              {activeEnrichedSize?.stock === 0 ? (
+                <span style={{ color: '#ef4444', marginLeft: '6px', fontSize: '0.8rem', fontWeight: 600 }}>
+                  (Agotado)
+                </span>
+              ) : activeEnrichedSize && activeEnrichedSize.stock <= 3 && activeEnrichedSize.stock > 0 ? (
+                <span style={{ color: '#f59e0b', marginLeft: '6px', fontSize: '0.8rem', fontWeight: 600 }}>
+                  (¡Últimas {activeEnrichedSize.stock} unidades!)
+                </span>
+              ) : null}
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsGuideOpen(true)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#15803d',
+                fontSize: '0.825rem',
+                fontWeight: 600,
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 0',
+              }}
+            >
+              <span>📏</span> Guía y medidas
+            </button>
           </div>
           <div className={styles.sizeChips}>
-            {sizes.map((s) => (
-              <button
-                key={s}
-                className={`${styles.sizeChip} ${selectedSize === s ? styles.sizeChipActive : ''}`}
-                onClick={() => setSelectedSize(s)}
-              >
-                {s}
-              </button>
-            ))}
+            {sizes.map((s) => {
+              const sizeStockInfo = activeSizesWithStock.find((item) => item.name === s);
+              const isOutOfStock = sizeStockInfo ? sizeStockInfo.stock === 0 : false;
+              const isSelected = selectedSize === s;
+
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  disabled={isOutOfStock}
+                  title={isOutOfStock ? `${s} (Agotado)` : `Talle ${s}`}
+                  className={`${styles.sizeChip} ${isSelected ? styles.sizeChipActive : ''}`}
+                  style={{
+                    position: 'relative',
+                    opacity: isOutOfStock ? 0.35 : 1,
+                    cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+                    textDecoration: isOutOfStock ? 'line-through' : 'none',
+                    backgroundColor: isOutOfStock ? '#f1f5f9' : undefined,
+                    color: isOutOfStock ? '#94a3b8' : undefined,
+                    borderColor: isOutOfStock ? '#cbd5e1' : undefined,
+                  }}
+                  onClick={() => {
+                    if (!isOutOfStock) {
+                      setSelectedSize(s);
+                    }
+                  }}
+                >
+                  {s}
+                </button>
+              );
+            })}
           </div>
+
+          {/* Transparent Supplier Size Notice */}
+          {activeEnrichedSize?.supplierSizeLabel && activeEnrichedSize.supplierSizeLabel !== selectedSize && (
+            <div
+              style={{
+                marginTop: '10px',
+                padding: '8px 12px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                color: '#166534',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px',
+              }}
+            >
+              <span style={{ fontSize: '1rem', marginTop: '-1px' }}>🏷️</span>
+              <div>
+                <strong>Talle GLak AR: {selectedSize}</strong> {activeEnrichedSize.numericSize && `(AR ${activeEnrichedSize.numericSize})`}
+                <div style={{ color: '#475569', fontSize: '0.75rem', marginTop: '2px' }}>
+                  La etiqueta cosida en la prenda física dice <strong>&apos;{activeEnrichedSize.supplierSizeLabel}&apos;</strong>{activeEnrichedSize.supplierName ? ` (${activeEnrichedSize.supplierName})` : ''}, calibrada a las medidas reales IRAM 75300.
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Dual CTA */}
@@ -322,6 +439,15 @@ export default function ProductOptions({ initialProduct, siblings, children }: P
         {/* Lookbook Completá el look children */}
         {children}
       </div>
+
+      <SizeGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+        garmentCategory={activeProduct.category || undefined}
+        sizes={activeSizesWithStock}
+        selectedSize={selectedSize}
+        onSelectSize={(newSize) => setSelectedSize(newSize)}
+      />
     </>
   );
 }
