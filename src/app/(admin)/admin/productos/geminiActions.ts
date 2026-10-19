@@ -182,3 +182,142 @@ export async function analyzeVariantColorWithAI(imageUrls: string[]) {
     }
   })(imageUrls);
 }
+
+export async function extractSupplierSizeChartAction(
+  imageSource: string,
+  options?: {
+    supplierName?: string;
+    garmentCategory?: import('@/types/sizing').GarmentCategoryType;
+    measurementMode?: import('@/types/sizing').MeasurementMode;
+    fitType?: import('@/types/sizing').GarmentFitType;
+    stretchLevel?: import('@/types/sizing').FabricStretchLevel;
+  }
+): Promise<import('@/lib/sizing/geminiSizeExtractor').ExtractAndTranslateChartResult> {
+  return withAdminAuth(async () => {
+    if (!imageSource) {
+      return { success: false, error: 'No se proveyó imagen para analizar la tabla de talles.' };
+    }
+
+    try {
+      const { buildSizeChartExtractionPrompt, parseAndTranslateGeminiChartResponse } = await import(
+        '@/lib/sizing/geminiSizeExtractor'
+      );
+      const promptText = buildSizeChartExtractionPrompt(options?.garmentCategory);
+
+      let base64Data = '';
+      let mimeType = 'image/jpeg';
+
+      if (imageSource.startsWith('data:')) {
+        const parts = imageSource.split(';base64,');
+        mimeType = parts[0].replace('data:', '') || 'image/jpeg';
+        base64Data = parts[1] || '';
+      } else {
+        const res = await fetch(imageSource.replace('http:', 'https:'));
+        if (!res.ok) {
+          throw new Error(`Error descargando imagen de tabla: HTTP ${res.status}`);
+        }
+        const arrayBuf = await res.arrayBuffer();
+        base64Data = Buffer.from(arrayBuf).toString('base64');
+        mimeType = res.headers.get('content-type') || 'image/jpeg';
+      }
+
+      const contents: any[] = [
+        { text: promptText },
+        {
+          inlineData: {
+            data: base64Data,
+            mimeType,
+          },
+        },
+      ];
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents,
+      });
+
+      const output = response.text;
+      if (!output) {
+        throw new Error('La IA no generó respuesta para la tabla de talles.');
+      }
+
+      const { extracted, translatedRows } = parseAndTranslateGeminiChartResponse(output, {
+        garmentCategory: options?.garmentCategory,
+        measurementMode: options?.measurementMode,
+      });
+
+      if (options?.supplierName) {
+        extracted.supplierName = options.supplierName;
+      }
+
+      return {
+        success: true,
+        extracted,
+        translatedRows,
+      };
+    } catch (err: any) {
+      console.error('Error extrayendo tabla con Gemini Vision:', err);
+      return { success: false, error: err?.message || 'Error extrayendo tabla de talles' };
+    }
+  })();
+}
+
+export async function listSupplierSizeProfilesAction(): Promise<{
+  success: boolean;
+  profiles?: import('@/types/sizing').SupplierSizeProfile[];
+  error?: string;
+}> {
+  return withAdminAuth(async () => {
+    try {
+      const { createSupplierProfileRepository } = await import('@/lib/sizing/supplierProfileStore');
+      const repo = createSupplierProfileRepository();
+      const profiles = await repo.listProfiles();
+      return { success: true, profiles };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Error listando perfiles' };
+    }
+  })();
+}
+
+export async function saveSupplierSizeProfileAction(
+  request: import('@/types/sizing').SupplierChartTranslationRequest & {
+    id?: string;
+    profileName?: string;
+    sourceType?: 'ai_image' | 'manual_template';
+  }
+): Promise<{
+  success: boolean;
+  profile?: import('@/types/sizing').SupplierSizeProfile;
+  error?: string;
+}> {
+  return withAdminAuth(async () => {
+    try {
+      const { buildSupplierSizeProfile, createSupplierProfileRepository } = await import(
+        '@/lib/sizing/supplierProfileStore'
+      );
+      const profile = buildSupplierSizeProfile(request);
+      const repo = createSupplierProfileRepository();
+      const saved = await repo.saveProfile(profile);
+      return { success: true, profile: saved };
+    } catch (err: any) {
+      console.error('Error guardando perfil de proveedor:', err);
+      return { success: false, error: err?.message || 'Error guardando perfil' };
+    }
+  })();
+}
+
+export async function deleteSupplierSizeProfileAction(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  return withAdminAuth(async () => {
+    try {
+      const { createSupplierProfileRepository } = await import('@/lib/sizing/supplierProfileStore');
+      const repo = createSupplierProfileRepository();
+      const ok = await repo.deleteProfile(id);
+      return { success: ok };
+    } catch (err: any) {
+      console.error('Error eliminando perfil de proveedor:', err);
+      return { success: false, error: err?.message || 'Error eliminando perfil' };
+    }
+  })();
+}
