@@ -1,34 +1,18 @@
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import styles from './CategoriesBento.module.css';
+import { getDynamicCategories } from '@/lib/content/contentStore';
+import { DynamicCategoryItem } from '@/types/content';
 
-const categories = [
-  {
-    name: 'Vestidos',
-    slug: '/tienda?cat=Vestidos',
-    image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&h=800&fit=crop&q=75',
-    span: 'tall',
-  },
-  {
-    name: 'Colección Italiana',
-    slug: '/tienda?collection=italiana',
-    image: 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=600&h=600&fit=crop&q=75',
-    span: 'normal',
-  },
-  {
-    name: 'Pantalones',
-    slug: '/tienda?cat=Pantalones',
-    image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&h=600&fit=crop&q=75',
-    span: 'normal',
-  },
-  {
-    name: 'Accesorios',
-    slug: '/tienda?cat=Accesorios',
-    image: 'https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=600&h=800&fit=crop&q=75',
-    span: 'wide',
-  },
-];
+interface CategoriesBentoProps {
+  categories?: DynamicCategoryItem[];
+}
 
-export default function CategoriesBento() {
+export default async function CategoriesBento({ categories: propCategories }: CategoriesBentoProps = {}) {
+  const dynamicCategories = propCategories && propCategories.length > 0
+    ? propCategories
+    : await getDynamicCategories();
+
   return (
     <section className={`section ${styles.section}`} id="categories-section">
       <div className="container">
@@ -36,29 +20,32 @@ export default function CategoriesBento() {
           Explorá por <span className="font-editorial" style={{ color: 'var(--accent-primary)' }}>categoría</span>
         </h2>
         <div className={styles.grid}>
-          {categories.map((cat) => (
-            <Link
-              key={cat.name}
-              href={cat.slug}
-              className={`${styles.card} ${styles[cat.span]}`}
-              id={`cat-${cat.name.toLowerCase()}`}
-            >
-              <img
-                src={cat.image}
-                alt={cat.name}
-                className={styles.image}
-                loading="lazy"
-                decoding="async"
-              />
-              <div className={styles.overlay} />
-              <div className={styles.label}>
-                <span className={styles.name}>{cat.name}</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </div>
-            </Link>
-          ))}
+          {dynamicCategories.map((cat, idx) => {
+            const safeName = cat.name || 'item';
+            const catId = `cat-${safeName.toLowerCase().replace(/\s+/g, '-')}`;
+            return (
+              <Link
+                key={cat.name || cat.slug || idx}
+                href={cat.slug}
+                className={`${styles.card} ${cat.span ? styles[cat.span] : ''}`}
+                id={catId}
+                aria-label={`Explorar categoría ${safeName}`}
+              >
+                <img
+                  src={cat.image}
+                  alt={safeName}
+                  className={styles.image}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className={styles.overlay} />
+                <div className={styles.label}>
+                  <span className={styles.name}>{safeName}</span>
+                  <ArrowRight className="w-4 h-4 shrink-0 transition-transform duration-200" aria-hidden="true" style={{ width: 16, height: 16 }} />
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
